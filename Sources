@@ -1,0 +1,17 @@
+#PURPOSE IS A LIST OF SOURCES TO REFER AND GIVE CREDIT TO IN THE FUTURE
+#SOURCE DESCRIPTION - Research Paper on fundamental GNC Principles
+#LINK               - https://secwww.jhuapl.edu/techdigest/Content/techdigest/pdf/V29-N01/29-01-Palumbo_Principles_Rev2018.pdf
+#SOURCE DESCRIPTION - Mathematical use of RK4 and GNC System Integration of data
+#LINK               - https://deepwiki.com/sankalp-s/Missile-Guidance-and-RL/1-overview
+#SOURCE DESCRIPTION - General Use of OpenCV and functions that are imported from library
+#LINK               - https://www.geeksforgeeks.org/python/opencv-python-tutorial/
+#SOURCE DESCRIPTION - Object Detection using OpenCV library
+#LINK               - https://www.geeksforgeeks.org/python/detect-an-object-with-opencv-python/
+#SOURCE DESCRIPTION - Object Detection with YOLO(Darknet CCN website) - also talks about how to train YOLO by making weights for the model
+#LINK               - https://pjreddie.com/darknet/yolo/
+#SOURCE DESCRIPTION - Paper from creators of YOLO on theory behind it, as well as how it compares to older methods of object detection
+#LINK               - https://arxiv.org/abs/1506.02640
+#SOURCE DESCRIPTION - 
+#LINK               - 
+#SOURCE DESCRIPTION - 
+#LINK               - 

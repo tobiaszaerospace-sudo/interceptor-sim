@@ -1,0 +1,52 @@
+#MISSILE INTERCEPTION ADN GUIDANCE SIMULATION
+#   A modular Python simulation for modeling target motion, interceptor dynamics, and guidance laws
+
+#OVERVIEW
+#   This project implements a modular missile interception simulation designed for research, experimentation, and demonstration of aerospace engineering fundamentals
+#   The architecture seperates state representation, guidance logic, vehicle dynamics, and simulation control
+#   The simulation will eventually be connected to hardware to point a turret in the direction of the target assuming a rapid acceleration and constant velocity of projectile
+#   The goal is to provide a transparent extensible framework for studying:\
+#       Target motion modeling
+#       Interceptor kinematics and dynamics
+#       Proportional navigation and other guidance laws
+#       Engagement geometry
+#       Simulation loop design
+#       Visualization adn analysis of interception performance
+#   This project is actively being developed as a part of a larger engineer portfolio
+
+#PROJECT STRUCTURE
+
+#Missile_Interception_Simulation Folder     -Holds Everything
+
+#   main.py                                 -Simulation Entry Point
+
+#   Simulation Folder
+#       state.py                            -State vector representation(position, velocity, acceleration)
+#       target.py                           -Target motion model
+#       interceptor.py                      -Interceptor model (mass, thrust, limits)
+#       guidance.py                         -Guidance laws(Proportional Navigation, Augmented Proportional Navigation, Zero Effort Miss, True Proportional Navigation(TPN), Command to Line of Sight(CLOS), etc)
+#       dynamics.py                         -3-DOF and eventually 6-DOF equations of motion
+#       integrator.py                       -Numerical Integration(Euler(fast rate),Runge-Kutta 4th Order(more accurate - like a taylor series))
+#       utils.py                            -Math helpers, coordinate transforms
+
+#   Visualization Folder
+#       plot2d.py                           -Plots in 2D
+#       plot3d.py                           -Plots in 3D
+#       animate.py                          -Animation Tool 
+
+#   Sensors Folder
+#       camera.py                           -Grab data from the camera
+#       tracking.py                         -Convert camera pixel data to usable data
+
+#   Hardware Folder
+#       servo.py                            -Tells servo to move(may add another in the future for camera to move as well)
+
+#   Data Folder
+#       Logs Folder                         -Holds logs of data
+
+#   README Text File                        -Documentation of what project is/goal
+
+#   Worklog Folder
+#       Multiple Documents                  -Each file is a file for what was worked on that day
+
+#   Sources Text File                       -Single File of all sources and their respective descriptions

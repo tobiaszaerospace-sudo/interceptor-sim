@@ -1,0 +1,41 @@
+#SUMMARY OF THE DAY
+#   Worked on State.py code, researched libraries needed to import, got rid of euler's method, spoke to Dr. G, got some ideas
+
+#TASKS COMPLETED
+#   Task 1 - State.py code - made State class with position, velocity, acceleration, and time values
+#
+#   Task 2 - Fixed python version to use numpy for mathematical operations
+#
+#   Task 3 - Spoke to Dr. G, good consultant for this project
+#
+
+#TECHNICAL INSIGHTS/DISCOVERIES FROM RESEARCH
+#   Takeaway - RK4 is a superior method of solving derived from the taylor series(Source Below is linked to overview, look at mutliple files)
+#   Source   - https://deepwiki.com/sankalp-s/Missile-Guidance-and-RL/1-overview
+#   Takeaway - Work on Camera Tracking to get blob detection through OpenCV or Pygame first, then go to simulation and such, eventually work to YOLO(You Only Look Once) machine learning
+#   Source   - Dr. Ghelarducci
+
+#BLOCK/ISSUES FROM TODAY
+#   Issue          - Couldn't import numpy to use mathematical library
+#   Possible Cause - Because newest version of python(as of April 2nd) doesn't have it
+#   Solution?      -Imported and now using older version of Python(3.12)
+
+#NEXT STEPS
+#   Need to Research - YOLO(Machine Learning), APRIL TAG Usage, Camera Tracking(OpenCV or pygame?) - get to Blob Detection
+#   Debugging        - N/A
+#   Need to Add      - Camera Blob Detection
+
+#ARTIFACTS GENERATED(Late Stage)
+#   Description     - N/A
+#   File Location   -
+#   File Name       -
+
+#GENERAL NOTES
+#   1) YOLO - Machine Learning
+#   2) APRIL TAG - scan and track the tag
+#   3) 
+
+1)Capture Image
+    Grab Image Through Camera on Laptop - Stack Overflow for research - OpenCV or pygame
+2)Blob Detection
+3)

@@ -1,0 +1,38 @@
+#SUMMARY OF THE DAY
+#   Researched Project, found common solving tactics/issues, made project structure
+
+#TASKS COMPLETED
+#   Task 1 - Clearly Defined Objective
+#
+#   Task 2 - Made Project Structure and File System
+#
+#   Task 3 - 
+#
+
+#TECHNICAL INSIGHTS/DISCOVERIES FROM RESEARCH
+#   Takeaway - Most successful interception sims use Proportional Navigation(PN) or Augmented PN
+#highly depends on correct handling of line-of-sight(LOS) rate, and realistic target motion models
+#   Source   - https://secwww.jhuapl.edu/techdigest/Content/techdigest/pdf/V29-N01/29-01-Palumbo_Principles_Rev2018.pdf
+#   Takeaway - Will need to use servo to make simple gimball mechanism
+#   Source   - General knowledge of work with the Robotics Association of Embry-Riddle(RAER), Student Unmanned Aircraft Systems(SUAS) divison
+#   Takeaway - Will need to use numerical integration methods such as Runge-Kutta method(RK4) - essentially a derivation from the taylor series, and Euler
+#   Source   - Asked AI general solving methods
+#   Takeaway - Will need to use a state vector for simulation
+#   Source   - General knowledge of Calc III and Physics II, any physical system can be written as a first order vector diff eq, allowing me to use numerical integration and multivariable calculus
+#BLOCK/ISSUES FROM TODAY
+#   Issue          - N/A
+#   Possible Cause - N/A
+#   Solution?      - N/A
+
+#NEXT STEPS
+#   Need to Research - Best solving methods for this project
+#   Debugging        - N/A
+#   Need to add      - Base State code so I can link everything from there
+
+#ARTIFACTS GENERATED(Late Stage)
+#   Description     - File Architecture
+#   File Location   - Personal Projects
+#   File Name       - Missile_Interception_Simulation
+
+#GENERAL NOTES
+#   1)Good Progress Today

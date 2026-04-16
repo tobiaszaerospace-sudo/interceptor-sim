@@ -1,0 +1,47 @@
+#SUMMARY OF THE DAY
+#Notes on Research of YOLO
+
+#TASKS COMPLETED
+#   Task 1 - Conceptual review of YOLO archivtecutre
+#
+#   Task 2 - N/A
+#
+#   Task 3 - N/A
+#
+
+#TECHNICAL INSIGHTS/DISCOVERIES FROM RESEARCH
+#   Takeaway - 
+#   Source   - 
+
+#BLOCK/ISSUES FROM TODAY
+#   Issue          - N/A
+#   Possible Cause - N/A
+#   Solution?      - N/A
+
+#NEXT STEPS
+#   Need to Research - Talk to Dr. G about YOLO with SMART Scholar on Tuesday
+#   Debugging        - N/A
+#   Need to Add      - Weight through teaching YOLO through using GPU to detect drone object
+
+#ARTIFACTS GENERATED(Late Stage)
+#   Description     - N/A
+#   File Location   - N/A
+#   File Name       - N/A
+
+#GENERAL NOTES
+#   1)YOLO is a Deep Neural Network(DNN) that operates from convolution layers. It's backbone(Darknet-53) is a CNN.
+#   2) 
+#   3)
+#YOLO Fundamentals
+#1) Everything in YOLO is a tensor(SxSx(B*5 + C))Where S is number of boxes on one side, B is a box with FIVE values, and C is number of classes
+#2) Utilized Convolution Neural Network(CNN, AKA the black box) to grab features and patterns(edges, textures, shapes, objects)
+#3) Darknet-53 is YOLOv3's backbone(big black box)
+
+#YOLO Pipeline
+#1) Grab Input image
+#2) Throw it into CNN(Darknet-53)
+#3) Use three scales(13X13, 26X26, 52X52) to predict B anchor boxes per grid cell, outputting x,y,w,h values and markers of probabilities for classes
+#4) Compile all that data into actual bounding boxes and probabilities(confidence)
+#5) Scrap boxes that are not likely to be objects
+#6) Get rid of boxes that overlap, and keep just the best one per object
+#7) Now you have the frame with just the best boxes and labels

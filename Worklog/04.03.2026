@@ -1,0 +1,34 @@
+#SUMMARY OF THE DAY
+#WORKED ON HOOKING UP CAMERA VIA CODE, AND UTILIZING POPULAR DETECTION, RESEARCHED DETECTION STRATEGIES
+
+#TASKS COMPLETED
+#   Task 1 - GOT CAMERA HOOKED UP IN LOOP FOR CODE
+#
+#   Task 2 - GOT DETECTION SYSTEM UP AND RUNNING(USING CASCADE CLASSIFIER)
+#
+#   Task 3 - 
+#
+
+#TECHNICAL INSIGHTS/DISCOVERIES FROM RESEARCH
+#   Takeaway - OpenCV Imports in BGR(Blue, Green, Red) but other scales like Gray or RGB may be better at detecting things, each one has their own strengths
+#   Source   - https://www.geeksforgeeks.org/python/opencv-python-tutorial/
+
+#BLOCK/ISSUES FROM TODAY
+#   Issue          - Using functions from OpenCV
+#   Possible Cause - Learning Curve, don't remember all of the functions and input/outputs of them yet
+#   Solution?      - Will take time to remember all of them, familiarity through usage
+
+#NEXT STEPS
+#   Need to Research - How to make my own detection system instead of relying on Cascade Classifier
+#   Debugging        - N/A
+#   Need to Add      - My own detection system
+
+#ARTIFACTS GENERATED(Late Stage)
+#   Description     - Proof of Camera Recognition and Facial Scanner(Using Cascade Classifier)
+#   File Location   - Missile_Interception_Simulation_Artifacts
+#   File Name       - 04.03.2026-Camera_Recognition
+
+#GENERAL NOTES
+#   1) 
+#   2) 
+#   3)

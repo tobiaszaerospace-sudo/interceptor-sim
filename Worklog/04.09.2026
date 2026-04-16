@@ -1,0 +1,35 @@
+#SUMMARY OF THE DAY
+#Reworked Camera.py completely, was too complex before
+
+#TASKS COMPLETED
+#   Task 1 - Redid Camera.py, now it's a class that can be called easier later on
+#
+#   Task 2 - 
+#
+#   Task 3 - 
+#
+
+#TECHNICAL INSIGHTS/DISCOVERIES FROM RESEARCH
+#   Takeaway - Files should make use of classes, which will make a big project like this easier in the long run
+#   Source   - Remembering projects with Mr. Eramo from high school python coding
+
+#BLOCK/ISSUES FROM TODAY
+#   Issue          - N/A
+#   Possible Cause - N/A
+#   Solution?      - N/A
+
+#NEXT STEPS
+#   Need to Research - YOLO and how it works, making my own "weight"
+#   Debugging        - N/A
+#   Need to Add      - N/A
+
+#ARTIFACTS GENERATED(Late Stage)
+#   Description     - N/A
+#   File Location   - N/A
+#   File Name       - N/A
+
+#GENERAL NOTES
+#   1) Research YOLO through paper and figure out how it works
+#   2) Learn how to re-train it on my own target
+#   3) Look at making neural networks to detect hanadwriting - for way down the road in this project
+#   4) Spoke to Dr. G today, gonna read articles and speak to him maybe on Tuesday with SMART Scholar about fundamentals of YOLO
