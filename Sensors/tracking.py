@@ -19,8 +19,8 @@ class Tracker:
 
     #STANDARD EMPTY DETECTION RETURN DICTIONARY
     def _empty_detection(self):
-        return {"cx": None,      #(x,y) PIXEL COORDINATES
-                "cy": None,      #(x,y) PIXEL COORDINATES
+        return {"cx": None,      #x PIXEL COORDINATE
+                "cy": None,      #y PIXEL COORDINATE
                 "w": None,       #WIDTH IN PIXELS
                 "h": None,       #HEIGHT IN PIXELS
                 "confidence": 0.0,  #0.0 TO 1.0
