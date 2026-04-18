@@ -1,0 +1,38 @@
+#SUMMARY OF THE DAY
+# Figured out the cause of webcam failure in YOLO tracking pipeline. Limitation of WSL2, not code. Need to get USB camera not webcam to see stuff
+
+#TASKS COMPLETED
+#   Task 1 - 
+#
+#   Task 2 - 
+#
+#   Task 3 - 
+#
+
+#TECHNICAL INSIGHTS/DISCOVERIES FROM RESEARCH
+#   Takeaway - Windows can't use CUDA with current PyTorch builds for the RTX 5070, making Linux the only envioronment for GPU-based YOLO. Linux also can't use internal webcams, meaning only external USB cameras can be used.
+#   Source   -  WSL2 documentation, PyTorch CUDA compatability notes, system-level testing
+
+#BLOCK/ISSUES FROM TODAY
+#   Issue          - GPU not usable on Windows for YOLO
+#   Possible Cause - RTX5070 can't interface with current PyTorch CUDA builds on windows, GPU is only available insude Ubuntu subsystem
+#   Solution?      - Continue making code on VS code, but when want to test YOLO with camera footage, run inside of Linux where CUDA is supported
+
+#   Issue          - No camera detected on Ubuntu
+#   Possible Cause - Ubuntu can't access internal laptop webcam
+#   Solution?      - Use external USB webcam and attach it to Ubuntu
+
+#NEXT STEPS
+#   Need to Research - Find compatible USB webcam that can be used for Ubuntu
+#   Debugging        - Test Ubuntu once the external webcam is attached and verify YOLO interface on live feed
+#   Need to Add      - Integrate camera stream into tracking.py
+
+#ARTIFACTS GENERATED(Late Stage)
+#   Description     - N/A
+#   File Location   - N/A
+#   File Name       - N/A
+
+#GENERAL NOTES
+#   1) GPU use is only available insisde Ubuntu because current PyTorch CUDA builds don't support RTX 5070 on windows
+#   2) Internal Laptop webcams can't be used on WSL2, only external cameras
+#   3) Other than that, YOLO, CUDA, and PyTorch are all functionin correctly in Ubuntu
