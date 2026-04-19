@@ -2,7 +2,7 @@
 # Figured out the cause of webcam failure in YOLO tracking pipeline. Limitation of WSL2, not code. Need to get USB camera not webcam to see stuff
 
 #TASKS COMPLETED
-#   Task 1 - 
+#   Task 1 - AprilTag Detection
 #
 #   Task 2 - 
 #
