@@ -4,6 +4,8 @@
 from Sensors.camera import Camera
 #IMPORT YOLO
 from ultralytics import YOLO
+#IMPORT OPENCV FOR IMAGE PROCESSING
+import cv2
 #IMPORT APRILTAGS
 from pupil_apriltags import Detector
 
@@ -15,7 +17,7 @@ class Tracker:
         #  OF CAMERA SO IT CAN BE REFERENCED EASIER
         self.camera = Camera()
         self.yolo = YOLO("yolov8n.pt") #LOAD YOLO MODEL (CHANGE TO CUSTOM MODEL AFTER TRAINED)
-        self.apriltag = Detector()#TODO)FILL IN APRILTAG DETECTOR PARAMETERS
+        self.apriltag = Detector(families=["tag36h11"], nthreads=4,quad_decimate=1.0,quad_sigma=0.0, refine_edges=True,)#TODO)FILL IN APRILTAG DETECTOR PARAMETERS
 
     #STANDARD EMPTY DETECTION RETURN DICTIONARY
     def _empty_detection(self):
@@ -58,8 +60,34 @@ class Tracker:
     #FUNCTION FOR APRILTAG DETECTION(BASELINE)
     def detect_apriltag(self, frame):
         detection = self._empty_detection()
-        #TODO) RUN APRILTAG, FILL PIXEL, CONFIDENCE, AND VALID
-        return detection #WILL MODIFY EMPTY DETECTION WITH VALEUS AND RETURN THAT
+
+        #CONVERT TO GRAYSCALE FOR APRILTAG DETECTION
+        gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+        #RUN THE DETECTOR
+        tags = self.apriltag.detect(gray_frame, estimate_tag_pose=False, camera_params=[None], tag_size=None)
+
+        #IN EVENT OF NO DETECTION
+        if len(tags) == 0:
+            return detection
+        
+        #USE THE FIRST DETECTED TAG (ONLY GONNA BE USING ONE ANYWAYS)
+        tag = tags[0]
+
+        #GRAB THE CENTER AND SIZE OF THE DETECTED TAG
+        cx, cy = tag.center
+        w, h = tag.size
+
+        #RETURN DICTIONARY FORMAT
+        return {
+            "cx": float(cx),    #X CENTER
+            "cy": float(cy),    #Y CENTER
+            "w": float(w),      #WIDTH
+            "h": float(h),      #HEIGHT
+            "confidence": 1.0,  #ASSUME 100% CONFIDENCE FOR APRILTAG
+            "valid": True,      #VALID DETECTION
+            "raw": tags         #STORE RAW OUTPUT FOR DEBUGGING
+        }
 
     #RETREIVE FRAME FROM CAMERA AND RUN DETECTION/TRACKING ON IT
     def process_frame(self):
