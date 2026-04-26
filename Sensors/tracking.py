@@ -17,7 +17,7 @@ class Tracker:
         #  OF CAMERA SO IT CAN BE REFERENCED EASIER
         self.camera = Camera()
         self.yolo = YOLO("yolov8n.pt") #LOAD YOLO MODEL (CHANGE TO CUSTOM MODEL AFTER TRAINED)
-        self.apriltag = Detector(families=["tag36h11"], nthreads=4,quad_decimate=1.0,quad_sigma=0.0, refine_edges=True,)#TODO)FILL IN APRILTAG DETECTOR PARAMETERS
+        self.apriltag = Detector(families=["tag36h11"], nthreads=4,quad_decimate=1.0,quad_sigma=0.0, refine_edges=True,)
 
     #STANDARD EMPTY DETECTION RETURN DICTIONARY
     def _empty_detection(self):
