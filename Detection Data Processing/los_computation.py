@@ -11,7 +11,7 @@ class LOSComputer:
         self.image_height = image_height
 
         #COMPUTE VERTICAL FOV BASED ON ASPECT RATIO
-        aspect_ratio = image_width / image_height
+        aspect_ratio = image_height / image_width
         self.camera_fov_degrees_y = 2*math.degrees(math.atan(aspect_ratio*math.tan(math.radians(camera_fov_degrees)/2)))
         #PRECOMPUTE PIXEL TO DEGREE SCALE FOR X AND Y
         self.deg_per_pixel_x = self.camera_fov_degrees / image_width
