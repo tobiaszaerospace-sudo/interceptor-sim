@@ -15,3 +15,18 @@ class ServoController:
     #CLOSE THE SERIAL CONNECTION
     def close(self):
         self.ser.close()
+
+#TEST USING THE CLASS TO ROTATE SERVO TO 15 DEGREES, WE ONLY HAVE ONE SERVO
+servo = ServoController()
+if input("Do you want to test the servo? (y/n): ").lower() == "y":
+    try:
+        servo.set_servo_angle(105, 0) 
+        print("Moved to 75 degrees")
+        time.sleep(5)
+        servo.set_servo_angle(75, 0)
+        print("Moved to 75 degrees")
+        time.sleep(5)
+    except KeyboardInterrupt:
+        print("Exiting")
+    finally:
+        servo.close()
