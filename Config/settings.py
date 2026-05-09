@@ -6,8 +6,10 @@ class Settings:
         self.image_width = 640
         self.image_height = 480
         self.camera_index = 0
+        self.fps = 30
         #HARDWARE SETTINGS
         self.servo_port = "COM4"
         self.servo_baud = 115200
         #MODEL SETTINGS
         self.yolo_model_path = "yolov8n.pt"
+settings = Settings()
