@@ -1,0 +1,34 @@
+#SUMMARY OF THE DAY
+#Worked on arduino hardware connection skills
+
+#TASKS COMPLETED
+#   Task 1 - Established communication between computer and arduino uno, got it to blink
+#
+#   Task 2 - Made and uploaded sketch to Arduino UNO for reading and using info from python files(9 for azamuth, 10 for elevation)
+#
+#   Task 3 - 
+#
+
+#TECHNICAL INSIGHTS/DISCOVERIES FROM RESEARCH
+#   Takeaway - How to use Arduino Uno
+#   Source   - Arduino articles/tutorials
+
+#BLOCK/ISSUES FROM TODAY
+#   Issue          - serial not being recognized
+#   Possible Cause - was because I was trying to run it on powershell
+#   Solution?      - ran through python(in terminal wrote python "folder/filename" to run it instead of clickign button to run at the top)
+
+#NEXT STEPS
+#   Need to Research - What servos to get
+#   Debugging        - N/A
+#   Need to Add      - N/A
+
+#ARTIFACTS GENERATED(Late Stage)
+#   Description     - N/A
+#   File Location   - N/A
+#   File Name       - N/A
+
+#GENERAL NOTES
+#   1)
+#   2) 
+#   3)
