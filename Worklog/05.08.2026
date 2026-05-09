@@ -1,0 +1,34 @@
+#SUMMARY OF THE DAY
+#Worked on moving servos, writing main.py, mapping out options, and setting to-do list
+
+#TASKS COMPLETED
+#   Task 1 - Filled iin majority of main.py
+#
+#   Task 2 - Got Servos to move on command
+#
+#   Task 3 - 
+#
+
+#TECHNICAL INSIGHTS/DISCOVERIES FROM RESEARCH
+#   Takeaway - Whole system can run on Linux subsystem, don't have to deal with Windows - WSL communication
+#   Source   - Testing to see if Arduino can receive signals from WSL
+
+#BLOCK/ISSUES FROM TODAY
+#   Issue          - How to connect Arduino to WSL
+#   Possible Cause - Inexperience
+#   Solution?      - Run windows powershell as administrator, move by name to WSL, and then it works
+
+#NEXT STEPS
+#   Need to Research - PN and APN Equations, ways to plot in 3D for visualization of interception, and plot results on python - debating using matlab for this
+#   Debugging        - N/A
+#   Need to Add      - Simulation, Gimball Calibration actually saving(maybe), Integrate camera(when it comes in)
+
+#ARTIFACTS GENERATED(Late Stage)
+#   Description     - N/A
+#   File Location   - N/A
+#   File Name       - N/A
+
+#GENERAL NOTES
+#   1) Need to occasionally unplug and plug back in the extra power supply, servo will just stop working
+#   2) 
+#   3)
