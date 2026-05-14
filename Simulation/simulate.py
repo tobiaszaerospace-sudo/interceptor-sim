@@ -28,6 +28,10 @@ def run_simulation(guidance_mode, dt, t_max, kill_radius, max_accel, tau, N):
     t = 0.0
     hit = False
     accel_log = []
+    time_log = []
+    range_log = []
+    interceptor_pos_log = []
+    target_pos_log = []
 
     #START LOOP
     while t < t_max:
@@ -59,9 +63,15 @@ def run_simulation(guidance_mode, dt, t_max, kill_radius, max_accel, tau, N):
             while mode not in ["PN", "APN", "ZEM"]:
                 mode = input("Enter a correct mode: ").upper()
         
-        #AUTOPILOT CORRECTION AND UPDATING
+        #AUTOPILOT CORRECTION
         a_actual = autopilot.update(a_command, dt)
+
+        #LOGGING HISTORY
         accel_log.append([a_actual[0], a_actual[1], a_actual[2], np.sqrt(a_actual[0]**2 + a_actual[1]**2 + a_actual[2]**2)])
+        range_log.append(Range)
+        time_log.append(t)
+        interceptor_pos_log.append(interceptor.r.copy())
+        target_pos_log.append(target.r.copy())
 
         #INTERCEPTOR DYNAMICS
         interceptor.step_rk4(dt, a_actual)
@@ -92,5 +102,10 @@ def run_simulation(guidance_mode, dt, t_max, kill_radius, max_accel, tau, N):
         "miss_distance" : miss_distance,
         "t_final" : t,
         "avg_accel" : avg_accel,
-        "peak_accel" : peak_accel
+        "peak_accel" : peak_accel,
+        "time_history" : np.array(time_log),
+        "range_history" : np.array(range_log),
+        "accel_history" : accel_array,
+        "interceptor_history" : np.array(interceptor_pos_log),
+        "target_history" : np.array(target_pos_log)
     }
