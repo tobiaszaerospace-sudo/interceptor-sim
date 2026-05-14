@@ -5,6 +5,13 @@ class Autopilot:
     #INITIALIZZE AUTOPILOT TAU IS A FIRST ORDER LAG TIME CONSTANT
     def __init__(self, max_accel = None, tau = None):
         self.max_accel = max_accel
+        #VALIDATE TIME CONSTANT
+        while tau is None or tau <= 0:
+            try:
+                tau = float(input("Enter a positive tau value: "))
+            except ValueError:
+                print("Invalid input. Please enter a numeric value.")
+                tau = None #force loop to continue
         self.tau = tau
         self.a_actual = np.zeros(3)
     

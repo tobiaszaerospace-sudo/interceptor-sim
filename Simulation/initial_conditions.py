@@ -1,7 +1,11 @@
 #Initial conditions for the simulation, including missile and interceptor parameters, and environmental conditions.
 import math
-import serial
 import time
+#BLOCK AGAINST IMPORT ISSUES CRASHING
+try:
+    import serial
+except ImportError:
+    serial = None
 
 #FUNCTION FOR VALIDATING NUMERIC VALUES
 def get_float(prompt):
@@ -18,6 +22,12 @@ class InitialConditions:
 
     #INITIAL HEADING FUNCTION
     def read_gimball_angles(self):
+        #CHECK IF SERIAL MODULE ISN'T THERE FIRST
+        if serial is None:
+            print("Gimball read failed. Falling back to manual input.")
+            yaw_deg = get_float("Enter interceptor yaw angle (degrees): ")
+            pitch_deg = get_float("Enter interceptor pitch angle (degrees): ")
+            return math.radians(yaw_deg), math.radians(pitch_deg)
         try:
             #OPEN SERIAL PORT AND READ DATA
             ser = serial.Serial(self.port, self.baudrate, timeout=1)
