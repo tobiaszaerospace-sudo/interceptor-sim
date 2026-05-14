@@ -1,17 +1,10 @@
 #IMPORT LIBRARIES
 import time
-import cv2
-import numpy as np
 #IMPORT CLASSES
-from Sensors.camera import Camera
-from Sensors.tracking import Tracker
-from Detection_Data_Processing.prediction import Prediction
-from Detection_Data_Processing.los_computation import LOSComputer
-from Hardware.servo import ServoController
 from Config.settings import settings
-from Hardware.gimball_tracking import run_gimbal_tracking
+from Hardware.gimbal_tracking import run_gimbal_tracking
 from Hardware.gimbal_calibration import run_gimbal_calibration
-from Config.setings_menu import run_settings_menu
+from Config.settings_menu import run_settings_menu
 
 #OPTION 2: SIMULATION
 def run_interceptor_simulation():
