@@ -27,11 +27,7 @@ def run_simulation(guidance_mode, dt, t_max, kill_radius, max_accel, tau, N):
     #LOGGING
     t = 0.0
     hit = False
-    accel_log = []
-    time_log = []
-    range_log = []
-    interceptor_pos_log = []
-    target_pos_log = []
+    history = []
 
     #START LOOP
     while t < t_max:
@@ -67,11 +63,23 @@ def run_simulation(guidance_mode, dt, t_max, kill_radius, max_accel, tau, N):
         a_actual = autopilot.update(a_command, dt)
 
         #LOGGING HISTORY
-        accel_log.append([a_actual[0], a_actual[1], a_actual[2], np.sqrt(a_actual[0]**2 + a_actual[1]**2 + a_actual[2]**2)])
-        range_log.append(Range)
-        time_log.append(t)
-        interceptor_pos_log.append(interceptor.r.copy())
-        target_pos_log.append(target.r.copy())
+        step = {
+            "t": t,
+            "interceptor_pos" : interceptor.r.copy(),
+            "interceptor_vel" : interceptor.v.copy(),
+            "target_pos" : target.r.copy(),
+            "target_vel" : target.v.copy(),
+            "r_rel" : r_rel.copy(),
+            "v_rel" : v_rel.copy(),
+            "range" : Range,
+            "closing_velocity" : Vc,
+            "los_rate" : los_rate,
+            "los_angle" : np.arctan2(r_rel[1], r_rel[0]),
+            "a_command" : a_command.copy(),
+            "a_actual" : a_actual.copy(),
+            "accel_mag" : np.sqrt(a_actual[0]**2 + a_actual[1]**2 + a_actual[2]**2),
+        }
+        history.append(step)
 
         #INTERCEPTOR DYNAMICS
         interceptor.step_rk4(dt, a_actual)
@@ -83,17 +91,12 @@ def run_simulation(guidance_mode, dt, t_max, kill_radius, max_accel, tau, N):
         t += dt
 
     #FINAL MISS DISTANCE
-    miss_distance = Range
+    miss_distance = Range  
 
-    #CONVERT LIST TO NUMPY ARRAY FOR STATS
-    if accel_log:
-        accel_array = np.array(accel_log)
-        avg_accel = float(np.mean(accel_array[:,3]))
-        peak_accel = float(np.max(accel_array[:,3]))
-    else:
-        avg_accel = 0.0
-        peak_accel = 0.0
-                           
+    #ACCELERATION STATS
+    accel_mags = [step["accel_mag"] for step in history]
+    avg_accel = float(np.mean(accel_mags)) if accel_mags else 0.0
+    peak_accel = float(np.max(accel_mags)) if accel_mags else 0.0                   
 
     #RETURN LIBRARY FULL OF DATA
     return{
@@ -103,9 +106,5 @@ def run_simulation(guidance_mode, dt, t_max, kill_radius, max_accel, tau, N):
         "t_final" : t,
         "avg_accel" : avg_accel,
         "peak_accel" : peak_accel,
-        "time_history" : np.array(time_log),
-        "range_history" : np.array(range_log),
-        "accel_history" : accel_array,
-        "interceptor_history" : np.array(interceptor_pos_log),
-        "target_history" : np.array(target_pos_log)
+        "history" : history,
     }
