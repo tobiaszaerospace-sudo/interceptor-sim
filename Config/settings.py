@@ -12,4 +12,17 @@ class Settings:
         self.servo_baud = 115200
         #MODEL SETTINGS
         self.yolo_model_path = "yolov8n.pt"
+        #SIMULATION SETTINGS
+        self.dt = .01
+        self.t_max = 30
+        self.kill_radius = 5    #METERS
+        #GUIDANCE SETTINGS
+        self.N = 3.0
+        self.max_accel = 40.0
+        self.tau = .2
+        #PLOTTING SETTINGS
+        self.export_video = True
+        self.video_filename = "intercept_simulation.mp4"
+        self.plot_export_fps = 30
+
 settings = Settings()
