@@ -17,6 +17,9 @@ def run_simulation(guidance_mode, dt, t_max, kill_radius, max_accel, tau, N):
     ic = InitialConditions()
     ri0, vi0 = ic.build_interceptor()
     rt0, vt0, motion_type, params = ic.build_target()
+    mode = guidance_mode.upper()
+    while mode not in ["PN", "APN", "ZEM"]:
+        mode = input("Enter a correct mode: ").upper()
 
     #OBJECTS
     target = Target(rt0, vt0, motion_type, params)
@@ -47,20 +50,17 @@ def run_simulation(guidance_mode, dt, t_max, kill_radius, max_accel, tau, N):
         #LOS RATE
         los_rate = compute_los_rate(r_rel, v_rel, Range)
 
-        #TARGET ACCELERATION
-        mode = guidance_mode.upper()
+        #LOGGING STATE AND RUNNING CALCULATION
         if mode == "PN":
-            a_command = guidance.pn(r_hat, los_rate, Vc)
+            a_command = guidance.pn(r_hat, Vc, los_rate)
         elif mode == "APN":
-            a_command = guidance.apn(r_hat, los_rate, Vc, target.a)
+            a_command = guidance.apn(r_hat, Vc, los_rate, target.a)
         elif mode == "ZEM":
-            a_command = guidance.zem_guidance(r_rel, v_rel, target.a)
-        else:
-            while mode not in ["PN", "APN", "ZEM"]:
-                mode = input("Enter a correct mode: ").upper()
+            a_command = guidance.zem_guidance(r_rel, v_rel, target.a, Vc, Range)
         
         #AUTOPILOT CORRECTION
         a_actual = autopilot.update(a_command, dt)
+        interceptor.set_acceleration(a_actual)
 
         #LOGGING HISTORY
         step = {
@@ -82,7 +82,7 @@ def run_simulation(guidance_mode, dt, t_max, kill_radius, max_accel, tau, N):
         history.append(step)
 
         #INTERCEPTOR DYNAMICS
-        interceptor.step_rk4(dt, a_actual)
+        interceptor.step_rk4(dt)
 
         #TARGET DYNAMICS
         target.update(dt)
@@ -100,7 +100,7 @@ def run_simulation(guidance_mode, dt, t_max, kill_radius, max_accel, tau, N):
 
     #RETURN LIBRARY FULL OF DATA
     return{
-        "model" : guidance_mode.upper(),
+        "model" : mode,
         "hit" : hit,
         "miss_distance" : miss_distance,
         "t_final" : t,
