@@ -1,0 +1,34 @@
+#SUMMARY OF THE DAY
+#Worked on simulation code
+
+#TASKS COMPLETED
+#   Task 1 - initial conditions, interceptor, target, relative kinematics, los rate, guidance_palumbo
+#
+#   Task 2 - N/A
+#
+#   Task 3 - N/A
+#
+
+#TECHNICAL INSIGHTS/DISCOVERIES FROM RESEARCH
+#   Takeaway - Simulation is extremely easy, can just find equations in papers and code 
+#   Source   - N/A
+
+#BLOCK/ISSUES FROM TODAY
+#   Issue          - Reading and finding equations in paper is difficult, lot's of large words, seems like writers are trying to make it seem more complicated than it is sometimes
+#   Possible Cause - Haven't really read research papers as much as those that have written them
+#   Solution?      - Read more research papers
+
+#NEXT STEPS
+#   Need to Research - Lag and acceleration/control theory and equations to account for it
+#   Debugging        - N/A
+#   Need to Add      - Autopilot, simulate, and animation
+
+#ARTIFACTS GENERATED(Late Stage)
+#   Description     - N/A
+#   File Location   - N/A
+#   File Name       - N/A
+
+#GENERAL NOTES
+#   1)
+#   2) 
+#   3)
