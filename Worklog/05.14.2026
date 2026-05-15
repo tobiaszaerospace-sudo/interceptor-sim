@@ -1,0 +1,34 @@
+#SUMMARY OF THE DAY
+#Worked on simulation tasks
+
+#TASKS COMPLETED
+#   Task 1 - Debugged simulation files
+#
+#   Task 2 - Got regular plotting and animation
+#
+#   Task 3 - 
+#
+
+#TECHNICAL INSIGHTS/DISCOVERIES FROM RESEARCH
+#   Takeaway - Need to add kalman filter, real life simulation, CSV export, and monte-carlo
+#   Source   - Brainstorming on things to add
+
+#BLOCK/ISSUES FROM TODAY
+#   Issue          - Getting the plot picture of the missile to change direciton with respect to the velocity vector was difficult
+#   Possible Cause - Inexperience
+#   Solution?      - Research into common solutions, surprisingly ended up being matrices based solution
+
+#NEXT STEPS
+#   Need to Research - N/A
+#   Debugging        - N/A
+#   Need to Add      - run_simulation file, then hardware integratioin with camera for real life simulatin, kalman filter, CSV export, and monte-carlo
+
+#ARTIFACTS GENERATED(Late Stage)
+#   Description     - N/A
+#   File Location   - N/A
+#   File Name       - N/A
+
+#GENERAL NOTES
+#   1)
+#   2) 
+#   3)
