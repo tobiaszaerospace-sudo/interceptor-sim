@@ -21,7 +21,7 @@
 #NEXT STEPS
 #   Need to Research - N/A
 #   Debugging        - N/A
-#   Need to Add      - run_simulation file, then hardware integratioin with camera for real life simulatin, kalman filter, CSV export, and monte-carlo
+#   Need to Add      - run_simulation file, then hardware integratioin with camera for real life simulatin, gimball pointing in velocity/direction vector, kalman filter, CSV export, 6-DOF extension that plugs into accel limit or actuator lag, guidnace compariosn dashboard, and monte-carlo
 
 #ARTIFACTS GENERATED(Late Stage)
 #   Description     - N/A
