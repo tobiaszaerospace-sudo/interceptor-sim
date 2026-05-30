@@ -59,6 +59,7 @@ def run_simulator(settings):
         if Vc < 0:
             div_counter += 1
             if div_counter >= div_count:
+                print("Divergence detected, ending simulation.")
                 break
         else:
             div_counter = 0

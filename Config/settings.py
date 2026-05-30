@@ -20,7 +20,7 @@ class Settings:
         self.kill_radius = 5    #METERS
         #GUIDANCE SETTINGS
         self.N = 4.0
-        self.max_accel = 40.0
+        self.max_accel = 400.0
         self.tau = .05
         self.div_count = 10
         #PLOTTING SETTINGS
