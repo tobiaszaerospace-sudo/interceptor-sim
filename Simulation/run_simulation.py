@@ -32,6 +32,9 @@ def run_simulation():
         print("Invalid choice. Defaulting to PN.")
         guidance_mode = "PN"
     
+    #STORE GUIDANCE MODE
+    settings.guidance_mode = guidance_mode
+    
     #NOW SELECT TARGET MOTION
     #IF IT'S IDEALIZED, PICK MOTION MODEL
 
@@ -44,7 +47,7 @@ def run_simulation():
     N = settings.N
 
     #RUN SIMULATION
-    result = run_simulator(guidance_mode, dt, t_max, kill_radius, max_accel, tau, N)
+    result = run_simulator(settings)
 
     #PRINT SUMMARY
     print("\n=== Simulation Summary ===")

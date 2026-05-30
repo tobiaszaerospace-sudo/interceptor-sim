@@ -18,8 +18,8 @@ def get_float(prompt):
 #INITIAL CONDITIONS CLASS FOR SIMULATION
 class InitialConditions:
     def __init__(self, port = "COM4", baudrate = 115200):
-        self.port = port
-        self.baudrate = baudrate
+        self.port = settings.serial_port
+        self.baudrate = settings.baudrate
 
     #INITIAL HEADING FUNCTION
     def read_gimball_angles(self):
@@ -49,6 +49,8 @@ class InitialConditions:
     def build_interceptor(self):
         #GRAB SPEED FROM USER
         Vi = get_float("Enter an interceptor speed (m/s): ")
+        while Vi < 0:
+            Vi = get_float("Speed must be non-negative. Re-enter: ")
         #DETERMINE DIRECTION FROM GIMBALL OR MANUAL INPUT
         yaw_rad, pitch_rad = self.read_gimball_angles()
         #CONVERT TO VECTOR FORMAT
@@ -59,6 +61,7 @@ class InitialConditions:
         ]
         ri0 = [0, 0, 0] #INTERCEPTOR STARTING POSITION
         vi0 = [Vi * d for d in direction_vector] #INTERCEPTOR INITIAL VELOCITY VECTOR
+
         return ri0, vi0
     
     #TARGET IC's
@@ -80,9 +83,6 @@ class InitialConditions:
         else:
             print("Invalid choice, defaulting to constant velocity")
             target_motion = "constant_velocity"
-        
-        #STORE CHOICE SO INITIAL CONDITIONS CAN USE IT
-        settings.target_motion = target_motion
 
         #DIRECTION AND SPEED INPUTS
         Vt = get_float("Enter a target speed (m/s): ")
@@ -98,7 +98,12 @@ class InitialConditions:
             math.cos(pitch_rad) * math.sin(yaw_rad), #Y/j
             math.sin(pitch_rad) #Z/k
         ]
-        rt0 = [1000, 0, 0] #TARGET STARTING POSITION
+        #GRAB POSITION INPUTS
+        rt0x = get_float("Enter target initial X position(m): ")
+        rt0y = get_float("Enter target initial Y position(m): ")
+        rt0z = get_float("Enter target initial Z position(m): ")
+
+        rt0 = [float(rt0x), float(rt0y), float(rt0z)] #TARGET STARTING POSITION
         vt0 = [Vt * d for d in direction_vector] #TARGET INITIAL VELOCITY VECTOR
         #MOTION MODEL PARAMETERS
         params = {}
@@ -124,6 +129,12 @@ class InitialConditions:
                 axis = 'y'
             params['axis'] = axis
 
-
-        return rt0, vt0, target_motion, params
+        #SAVE AND RETURN ALL TARGET IC'S AND MOTION MODEL INFO
+        settings.target_motion = target_motion
+        return {
+            "initial_position": rt0,
+            "initial_velocity": vt0,
+            "motion_model": target_motion,
+            "params": params
+        }
 

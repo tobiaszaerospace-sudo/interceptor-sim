@@ -10,6 +10,8 @@ class Settings:
         #HARDWARE SETTINGS
         self.servo_port = "COM4"
         self.servo_baud = 115200
+        self.serial_port = "COM4"
+        self.baudrate = 115200
         #MODEL SETTINGS
         self.yolo_model_path = "yolov8n.pt"
         #SIMULATION SETTINGS
@@ -17,10 +19,10 @@ class Settings:
         self.t_max = 30
         self.kill_radius = 5    #METERS
         #GUIDANCE SETTINGS
-        self.N = 3.0
+        self.N = 4.0
         self.max_accel = 40.0
-        self.tau = .1
-        self.div_count = 5
+        self.tau = .05
+        self.div_count = 10
         #PLOTTING SETTINGS
         self.export_video = True
         self.video_filename = "intercept_simulation.mp4"

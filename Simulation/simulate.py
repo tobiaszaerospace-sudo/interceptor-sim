@@ -11,22 +11,33 @@ from Simulation.los_rate import compute_los_rate
 from Config.settings import settings
 
 #SIMULATION FUNCTION
-def run_simulator(guidance_mode, dt, t_max, kill_radius, max_accel, tau, N):
+def run_simulator(settings):
     #RUNS A SINGLE SIMULATION WITH GUIDANCE LAW, WILL RETURN DICTIONARY
+    #INITIALIZE SIMULATION PARAMETERS
+    dt = settings.dt
+    t_max = settings.t_max
+    kill_radius = settings.kill_radius
+    max_accel = settings.max_accel
+    tau = settings.tau
+    N = settings.N
 
     #INITIAL CONDITIONS
     ic = InitialConditions()
     ri0, vi0 = ic.build_interceptor()
-    rt0, vt0, motion_type, params = ic.build_target()
-    mode = guidance_mode.upper()
+    target_data = ic.build_target()
+    mode = settings.guidance_mode.upper()
     while mode not in ["PN", "APN", "ZEM"]:
         mode = input("Enter a correct mode: ").upper()
 
     #OBJECTS
-    target = Target(rt0, vt0, motion_type, params)
+    target = Target(target_data["initial_position"], target_data["initial_velocity"], target_data["motion_model"], target_data["params"])
     interceptor = Interceptor(ri0, vi0)
     guidance = Guidance(N=N)
     autopilot = Autopilot(max_accel = max_accel, tau = tau)
+
+    #DIVERGENCE CHECK
+    div_count = settings.div_count
+    div_counter = 0
 
     #LOGGING
     t = 0.0
@@ -45,8 +56,6 @@ def run_simulator(guidance_mode, dt, t_max, kill_radius, max_accel, tau, N):
             break
 
         #CHECK IF THE MISSILE IS NO LONGER CLOSING
-        div_count = settings.div_count
-        div_counter = 0
         if Vc < 0:
             div_counter += 1
             if div_counter >= div_count:
@@ -69,6 +78,7 @@ def run_simulator(guidance_mode, dt, t_max, kill_radius, max_accel, tau, N):
         a_actual = autopilot.update(a_command, dt)
         interceptor.set_acceleration(a_actual)
 
+        #CHECK, NEED TO REMOVE AFTER TESTING
         print(
             f"t={t:.2f}, "
             f"a_cmd={a_command}, "
@@ -96,7 +106,7 @@ def run_simulator(guidance_mode, dt, t_max, kill_radius, max_accel, tau, N):
         history.append(step)
 
         #INTERCEPTOR DYNAMICS
-        interceptor.step_rk4(dt)
+        interceptor.step_rk4(dt, a_actual)
 
         #TARGET DYNAMICS
         target.update(dt)

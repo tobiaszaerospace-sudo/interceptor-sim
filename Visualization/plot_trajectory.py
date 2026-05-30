@@ -91,10 +91,6 @@ def plot_3d_trajectory(history, kill_radius):
                           plt.Line2D([0], [0], color='red', lw=2, label='Target'),
                           Patch(facecolor='yellow', edgecolor='yellow', alpha=0.5, label=f'Kill Radius ({kill_radius} m)')]
     panel.legend(handles=legend_elements, loc='upper left')
-    
-
-    #CLEAN UP DATA
-    panel.legend()
 
     #ANIMATION UPDATE FUNCTION
     def update(i):
