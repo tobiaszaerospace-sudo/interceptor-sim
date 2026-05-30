@@ -19,7 +19,8 @@ class Settings:
         #GUIDANCE SETTINGS
         self.N = 3.0
         self.max_accel = 40.0
-        self.tau = .2
+        self.tau = .1
+        self.div_count = 5
         #PLOTTING SETTINGS
         self.export_video = True
         self.video_filename = "intercept_simulation.mp4"

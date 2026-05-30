@@ -1,16 +1,17 @@
 #IMPORT LIBRARY
 import numpy as np
 #IMPORT ALL OTHER FILES
-from initial_conditions import InitialConditions
-from target import Target
-from interceptor import Interceptor
-from autopilot import Autopilot
-from guidance_palumbo import Guidance
-from relative_kinematics import compute_relative_kinematics
-from los_rate import compute_los_rate
+from Simulation.initial_conditions import InitialConditions
+from Simulation.target import Target
+from Simulation.interceptor import Interceptor
+from Simulation.autopilot import Autopilot
+from Simulation.guidance_palumbo import Guidance
+from Simulation.relative_kinematics import compute_relative_kinematics
+from Simulation.los_rate import compute_los_rate
+from Config.settings import settings
 
 #SIMULATION FUNCTION
-def run_simulation(guidance_mode, dt, t_max, kill_radius, max_accel, tau, N):
+def run_simulator(guidance_mode, dt, t_max, kill_radius, max_accel, tau, N):
     #RUNS A SINGLE SIMULATION WITH GUIDANCE LAW, WILL RETURN DICTIONARY
 
     #INITIAL CONDITIONS
@@ -44,8 +45,14 @@ def run_simulation(guidance_mode, dt, t_max, kill_radius, max_accel, tau, N):
             break
 
         #CHECK IF THE MISSILE IS NO LONGER CLOSING
-        if Vc <= 0 and t > .1:
-            break
+        div_count = settings.div_count
+        div_counter = 0
+        if Vc < 0:
+            div_counter += 1
+            if div_counter >= div_count:
+                break
+        else:
+            div_counter = 0
 
         #LOS RATE
         los_rate = compute_los_rate(r_rel, v_rel, Range)
@@ -61,6 +68,13 @@ def run_simulation(guidance_mode, dt, t_max, kill_radius, max_accel, tau, N):
         #AUTOPILOT CORRECTION
         a_actual = autopilot.update(a_command, dt)
         interceptor.set_acceleration(a_actual)
+
+        print(
+            f"t={t:.2f}, "
+            f"a_cmd={a_command}, "
+            f"a_actual={a_actual}, "
+            f"|a|={np.linalg.norm(a_actual):.3f}, "
+            f"v={interceptor.v}")
 
         #LOGGING HISTORY
         step = {

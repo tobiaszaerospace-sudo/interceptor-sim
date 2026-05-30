@@ -14,12 +14,12 @@ class Guidance:
     
     #AUGMENTED PROPORTIONAL NAVIGATION (APN)
     def apn(self, r_hat, Vc, los_rate_vec, a_target):
-        #FORMULAS FROM PAPER
+        #FORMULAS FROM ZARCHAN PAPER
         a_pn = self.pn(r_hat, Vc, los_rate_vec)
         a_t_parallel = np.dot(a_target, r_hat) * r_hat
         a_t_perp = a_target - a_t_parallel
-        #BASIC APN FORMULA, PURE PN PLUS ACCELERATION VALUE
-        return a_pn + a_t_perp
+        #BASIC APN FORMULA, PURE PN PLUS ACCELERATION VALUE DERIVATION TERMS
+        return a_pn + .5 * self.N * a_t_perp
     
     #ZERO EFFORT MISS
     def compute_zem(self, r_rel, v_rel, a_target, t_go):

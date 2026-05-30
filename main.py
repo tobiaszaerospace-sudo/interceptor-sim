@@ -5,6 +5,7 @@ from Config.settings import settings
 from Hardware.gimbal_tracking import run_gimbal_tracking
 from Hardware.gimbal_calibration import run_gimbal_calibration
 from Config.settings_menu import run_settings_menu
+from Simulation.run_simulation import run_simulation
 
 #OPTION 2: SIMULATION
 def run_interceptor_simulation():
@@ -34,7 +35,7 @@ def main():
         if choice == "1":
             run_gimbal_tracking()
         elif choice == "2":
-            run_interceptor_simulation()
+            run_simulation()
         elif choice == "3":
             run_gimbal_calibration()
         elif choice == "4":

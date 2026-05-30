@@ -1,6 +1,7 @@
 #Initial conditions for the simulation, including missile and interceptor parameters, and environmental conditions.
 import math
 import time
+from Config.settings import settings
 #BLOCK AGAINST IMPORT ISSUES CRASHING
 try:
     import serial
@@ -63,10 +64,26 @@ class InitialConditions:
     #TARGET IC's
     def build_target(self):
         #GRAB MOTION TYPE AND CHECK IT
-        motion_type = input("Enter target motion type (constant_velocity, constant_acceleration, weaving): ").strip().lower()
-        valid_motion_types = ["constant_velocity", "constant_acceleration", "weaving"]
-        if motion_type not in valid_motion_types:
-            raise ValueError("Invalid motion type. Choose one of: constant_velocity, constant_acceleration, weaving. ")
+        print("\n=== Select Target Motion Model ===")
+        print("1. Constant Velocity")
+        print("2. Constant Acceleration")
+        print("3. Weaving")
+
+        #PICK MOTION CHOICE
+        motion_type = input("Enter choice (1-3): ").strip()
+        if motion_type == "1":
+            target_motion = "constant_velocity"
+        elif motion_type == '2':
+            target_motion = "constant_acceleration"
+        elif motion_type == '3':
+            target_motion = 'weaving'
+        else:
+            print("Invalid choice, defaulting to constant velocity")
+            target_motion = "constant_velocity"
+        
+        #STORE CHOICE SO INITIAL CONDITIONS CAN USE IT
+        settings.target_motion = target_motion
+
         #DIRECTION AND SPEED INPUTS
         Vt = get_float("Enter a target speed (m/s): ")
         while Vt < 0:
@@ -87,13 +104,13 @@ class InitialConditions:
         params = {}
         #CONSTANT VELOCITY DOESN'T NEED PARAMETERS, BUT OTHER MODELS DO
         #CONSTANT ACCELERATION, NEED VALUES FOR EACH DIRECTION
-        if motion_type == "constant_acceleration":
+        if target_motion == "constant_acceleration":
             ax = get_float("Enter target acceleration in X direction (m/s^2): ")
             ay = get_float("Enter target acceleration in Y direction (m/s^2): ")
             az = get_float("Enter target acceleration in Z direction (m/s^2): ")
             params['accel'] = [ax, ay, az]
         #WEAVING MOTION, NEED AMPLITUDE, FREQUENCY, AND AXIS
-        elif motion_type == "weaving":
+        elif target_motion == "weaving":
             params['amplitude'] = get_float("Enter weave amplitude (m/s^2): ")
             while params['amplitude'] < 0:
                 params['amplitude'] = get_float("Value must be non-negative. Re-enter: ")
@@ -108,5 +125,5 @@ class InitialConditions:
             params['axis'] = axis
 
 
-        return rt0, vt0, motion_type, params
+        return rt0, vt0, target_motion, params
 

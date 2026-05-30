@@ -3,7 +3,7 @@ import numpy as np
 
 class Autopilot:
     #INITIALIZZE AUTOPILOT TAU IS A FIRST ORDER LAG TIME CONSTANT
-    def __init__(self, max_accel = None, tau = None):
+    def __init__(self, max_accel = None, tau = 0.1):
         self.max_accel = max_accel
         #VALIDATE TIME CONSTANT
         while tau is None or tau <= 0:

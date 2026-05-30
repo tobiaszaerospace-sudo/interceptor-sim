@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.animation import FuncAnimation
 import numpy as np
+from matplotlib.patches import Patch
 
 # 3D ORIENTATION FROM VELOCITY
 def orientation_from_velocity(v):
@@ -58,7 +59,7 @@ def plot_3d_trajectory(history, kill_radius):
     target_body, = panel.plot([], [], [], color = "red", linewidth = 2)
 
     #TIME TEXT IN TOP CORNER
-    time_text = panel.text(0.95, 0.95, "", transform= panel.transAxes, ha = "right", va = "top", fontsize = 12)
+    time_text = panel.text(0.95, 0.95, 0, "", ha = "right", va = "top", fontsize = 12)
 
     #SET LABELS 
     panel.set_xlabel("X (m)")
@@ -84,7 +85,7 @@ def plot_3d_trajectory(history, kill_radius):
     sphere = panel.plot_surface(xs + xt[0,0],
                        ys + xt[0,1],
                        zs + xt[0,2],
-                       color="red", alpha=0.15)
+                       color="yellow", alpha=0.35, label = "_nolegend_")
 
     #CLEAN UP DATA
     panel.legend()
@@ -100,7 +101,7 @@ def plot_3d_trajectory(history, kill_radius):
         sphere = panel.plot_surface(xs+xt[i,0],
                                     ys + xt[i,1],
                                     zs + xt[i,2],
-                                    color = "red", alpha = .15)
+                                    color = "yellow", alpha = .15)
 
         #INTERCEPTOR ORIENTATION
         Rotation_i = orientation_from_velocity(vi[i])
