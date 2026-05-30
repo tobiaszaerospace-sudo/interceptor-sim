@@ -19,21 +19,21 @@ class Interceptor:
     #RUNGE-KUTTA 4TH ORDER METHOD FOR MORE ACCURATE MOTION UPDATE
     def step_rk4(self, dt):
         #K1 CALCULATIONS
-        v1 = self.v
-        a1 = self.a
+        k1_r = self.v
+        k1_v = self.a
 
         #K2 CALCULATIONS
-        v2 = self.v + .5*dt*a1
-        a2 = self.a
+        k2_r = self.v + .5*dt*k1_v
+        k2_v = self.a
 
         #K3 CALCULATIONS
-        v3 = self.v + .5*dt*a2
-        a3 = self.a
+        k3_r = self.v + .5*dt*k2_v
+        k3_v = self.a
 
         #K4 CALCULATIONS
-        v4 = self.v + dt*a3
-        a4 = self.a
+        k4_r = self.v + dt*k3_v
+        k4_v = self.a
 
         #COMBINE K1-K4 TO UPDATE POSITION AND VELOCITY
-        self.r += (dt/6)*(v1 + 2*v2 + 2*v3 + v4)
-        self.v += (dt/6)*(a1 + 2*a2 + 2*a3 + a4)
+        self.r += (dt/6)*(k1_r + 2*k2_r + 2*k3_r + k4_r)
+        self.v += (dt/6)*(k1_v + 2*k2_v + 2*k3_v + k4_v)

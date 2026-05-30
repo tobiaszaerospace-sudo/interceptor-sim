@@ -86,6 +86,12 @@ def plot_3d_trajectory(history, kill_radius):
                        ys + xt[0,1],
                        zs + xt[0,2],
                        color="yellow", alpha=0.35, label = "_nolegend_")
+    
+    legend_elements = [plt.Line2D([0], [0], color='blue', lw=2, label='Interceptor'),
+                          plt.Line2D([0], [0], color='red', lw=2, label='Target'),
+                          Patch(facecolor='yellow', edgecolor='yellow', alpha=0.5, label=f'Kill Radius ({kill_radius} m)')]
+    panel.legend(handles=legend_elements, loc='upper left')
+    
 
     #CLEAN UP DATA
     panel.legend()
