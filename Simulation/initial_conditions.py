@@ -49,7 +49,7 @@ class InitialConditions:
     def build_interceptor(self):
         #GRAB SPEED FROM USER
         Vi = get_float("Enter an interceptor speed (m/s): ")
-        while Vi < 0:
+        while Vi <= 0:
             Vi = get_float("Speed must be non-negative. Re-enter: ")
         #DETERMINE DIRECTION FROM GIMBALL OR MANUAL INPUT
         yaw_rad, pitch_rad = self.read_gimball_angles()

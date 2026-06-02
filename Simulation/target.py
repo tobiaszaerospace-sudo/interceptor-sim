@@ -10,6 +10,20 @@ class Target:
         self.params = params if params is not None else {}
         self.time = 0.0
 
+    #RK4 UPDATE FUNCTION
+    def step_rk4(self, dt):
+        a = self.a.copy()
+        k1_r = self.v
+        k1_v = a
+        k2_r = self.v + 0.5*dt*k1_v
+        k2_v = a
+        k3_r = self.v + 0.5*dt*k2_v
+        k3_v = a
+        k4_r = self.v + dt*k3_v
+        k4_v = a
+        self.r += (dt/6.0)*(k1_r + 2*k2_r + 2*k3_r + k4_r)
+        self.v += (dt/6.0)*(k1_v + 2*k2_v + 2*k3_v + k4_v)
+
     #MOTION MODELS
 
     #CONSTANT VELOCITY
@@ -21,10 +35,8 @@ class Target:
     def constant_acceleration(self, dt):
         #ACCELERATION FROM IC PARAMS
         self.a[:] = np.array(self.params['accel'], dtype = float)
-        #UPDATE VELOCITY
-        self.v += self.a*dt
-        #UPDATE POSITION
-        self.r += self.v*dt
+        #UPDATE VELOCITY AND POSITION
+        self.step_rk4(dt)
     
     #WEAVING MOTION MODEL
     def weaving(self, dt):
@@ -46,11 +58,8 @@ class Target:
         else:
             self.a[2] = a_val
         
-        #UPDATE VELOCITY
-        self.v += self.a*dt
-        
-        #UPDATE POSITION
-        self.r += self.v*dt
+        #UPDATE VELOCITY AND POSITION
+        self.step_rk4(dt)
     
     #UPDATE FUNCTION 
     def update(self, dt):

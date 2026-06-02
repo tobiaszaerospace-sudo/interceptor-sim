@@ -1,4 +1,6 @@
 from simulate import run_simulation
+from Config.settings import settings
+
 
 def compare_guidance_modes(dt, t_max, kill_radius, max_accel, tau, N):
     #SETUP AMOUNT OF MODES, AND INITIALIZE RESULTS AS BLANK
@@ -12,7 +14,8 @@ def compare_guidance_modes(dt, t_max, kill_radius, max_accel, tau, N):
 
     #SIMULATION CALCULATIONS
     for mode in modes:
-        out = run_simulation(mode, dt, t_max, kill_radius, max_accel, tau, N)
+        settings.guidance_mode = mode
+        out = run_simulation(settings)
         results[mode] = out
 
         #SHOW SIMULATION RESULTS IN FORMAT

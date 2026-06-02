@@ -7,12 +7,6 @@ from Hardware.gimbal_calibration import run_gimbal_calibration
 from Config.settings_menu import run_settings_menu
 from Simulation.run_simulation import run_simulation
 
-#OPTION 2: SIMULATION
-def run_interceptor_simulation():
-    print("Starting Interceptor Simulation...")
-    #TODO) IMPLEMENT SIMULATION MODE
-    print("Simulation mode is not yet implemented. Please check back later.")
-
 #OPTION 5: EXIT
 def exit_program():
     print("Exiting program. Goodbye!")

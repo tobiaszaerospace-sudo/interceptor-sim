@@ -1,0 +1,34 @@
+#SUMMARY OF THE DAY
+#Fixed the ZEM!
+
+#TASKS COMPLETED
+#   Task 1 - Fixed ZEM to be accurate and go towards target(removed - sign from equation)
+#
+#   Task 2 - Weaving model works, now all models work except for real life!
+#
+#   Task 3 - 
+#
+
+#TECHNICAL INSIGHTS/DISCOVERIES FROM RESEARCH
+#   Takeaway - Needed to get rid of - sign in ZEM
+#   Source   - Troubleshooting
+
+#BLOCK/ISSUES FROM TODAY
+#   Issue          - ZEM not moving correct direction
+#   Possible Cause - - Sign
+#   Solution?      - Remove negative
+
+#NEXT STEPS
+#   Need to Research - EK4 state estimation(right now simulation uses true values, nothing about real life noise)
+#   Debugging        - N/A
+#   Need to Add      - State estimation, sensor noise, monte carlo capability, graphs
+
+#ARTIFACTS GENERATED(Late Stage)
+#   Description     - N/A
+#   File Location   - N/A
+#   File Name       - N/A
+
+#GENERAL NOTES
+#   1)
+#   2) 
+#   3)

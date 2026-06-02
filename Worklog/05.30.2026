@@ -1,0 +1,34 @@
+#SUMMARY OF THE DAY
+#Worked on simulation, adjusted rk4 to include a value, and now it's responding to try and seek target
+
+#TASKS COMPLETED
+#   Task 1 - Found cause of lack of interceptor response - a value and rk4 integration, fixed it
+#
+#   Task 2 - made everything out of loop hook to settings instead of local arguments, much cleaner
+#
+#   Task 3 - 
+#
+
+#TECHNICAL INSIGHTS/DISCOVERIES FROM RESEARCH
+#   Takeaway - rk4 needed the current adjusted acceleration value, not just the self.a value
+#   Source   - trial and error
+
+#BLOCK/ISSUES FROM TODAY
+#   Issue          - simulation workflow
+#   Possible Cause - trial and error
+#   Solution?      - add a value
+
+#NEXT STEPS
+#   Need to Research - Monte Carlo simulation, things mentioned on the May 14th worklog
+#   Debugging        - N/A
+#   Need to Add      - Things mentioned on May 14th worklog, but first the gimball and camera integration
+
+#ARTIFACTS GENERATED(Late Stage)
+#   Description     - Simulation plotting
+#   File Location   - Missile_Interception_Simulation_Artifacts
+#   File Name       - 05.30.2026-Simulation_Plotting
+
+#GENERAL NOTES
+#   1) 
+#   2) 
+#   3)

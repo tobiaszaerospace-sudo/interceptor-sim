@@ -79,13 +79,13 @@ def run_simulator(settings):
         a_actual = autopilot.update(a_command, dt)
         interceptor.set_acceleration(a_actual)
 
-        #CHECK, NEED TO REMOVE AFTER TESTING
-        print(
-            f"t={t:.2f}, "
-            f"a_cmd={a_command}, "
-            f"a_actual={a_actual}, "
-            f"|a|={np.linalg.norm(a_actual):.3f}, "
-            f"v={interceptor.v}")
+        if settings.debug:
+            print(
+                f"t={t:.2f}, "
+                f"a_cmd={a_command}, "
+                f"a_actual={a_actual}, "
+                f"|a|={np.linalg.norm(a_actual):.3f}, "
+                f"v={interceptor.v}")
 
         #LOGGING HISTORY
         step = {

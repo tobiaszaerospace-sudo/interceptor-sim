@@ -3,6 +3,7 @@ import numpy as np
 from Config.settings import settings
 from Simulation.simulate import run_simulator
 from Visualization.plot_trajectory import plot_3d_trajectory
+kill_radius = settings.kill_radius
 
 #NO NEED FOR CLASS, CAN JUST USE FUNCTION
 def run_simulation():
@@ -34,17 +35,6 @@ def run_simulation():
     
     #STORE GUIDANCE MODE
     settings.guidance_mode = guidance_mode
-    
-    #NOW SELECT TARGET MOTION
-    #IF IT'S IDEALIZED, PICK MOTION MODEL
-
-    #PULL SETTINGS TO VARIABLES SO ITS EASIER TO USE
-    dt = settings.dt
-    t_max = settings.t_max
-    kill_radius = settings.kill_radius
-    max_accel = settings.max_accel
-    tau = settings.tau
-    N = settings.N
 
     #RUN SIMULATION
     result = run_simulator(settings)

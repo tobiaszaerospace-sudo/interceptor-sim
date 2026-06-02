@@ -18,6 +18,10 @@ class Settings:
         self.dt = .01
         self.t_max = 30
         self.kill_radius = 5    #METERS
+        self.guidance_mode = "PN"
+        self.target_motion = "constant_velocity"
+        self.debug = False
+        self.plot_interval_ms = 30
         #GUIDANCE SETTINGS
         self.N = 4.0
         self.max_accel = 400.0

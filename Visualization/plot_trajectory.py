@@ -3,6 +3,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.animation import FuncAnimation
 import numpy as np
 from matplotlib.patches import Patch
+from Config.settings import settings
 
 # 3D ORIENTATION FROM VELOCITY
 def orientation_from_velocity(v):
@@ -125,7 +126,7 @@ def plot_3d_trajectory(history, kill_radius):
         return interceptor_body, target_body, time_text, sphere
 
     #RUN ANIMATION
-    anim = FuncAnimation(fig, update, frames = len(history), interval = 30, blit = False)
+    anim = FuncAnimation(fig, update, frames = len(history), interval = settings.plot_interval_ms, blit = False)
 
     #SHOW IT CLEANLY
     plt.tight_layout()

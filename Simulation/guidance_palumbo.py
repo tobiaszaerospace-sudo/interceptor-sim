@@ -33,6 +33,10 @@ class Guidance:
         t_go = Range/Vc
         #ZEM VALUE
         zem = self.compute_zem(r_rel, v_rel, a_target, t_go)
-
+        #LOS UNIT VECTOR
+        r_hat = r_rel/Range
+        #DROP LOS COMPONENT, LOOK AT LATERAL ZEM(FIX TO TARGET NORMAL)
+        zem_parallel = np.dot(zem, r_hat)*r_hat
+        zep_perp = zem-zem_parallel
         #ZERO EFFORT MISS GUIDANCE OUTPUT
-        return -self.N_zem * zem / (t_go**2)
+        return self.N_zem * zep_perp / (t_go**2)

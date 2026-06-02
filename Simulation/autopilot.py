@@ -6,12 +6,8 @@ class Autopilot:
     def __init__(self, max_accel = None, tau = 0.1):
         self.max_accel = max_accel
         #VALIDATE TIME CONSTANT
-        while tau is None or tau <= 0:
-            try:
-                tau = float(input("Enter a positive tau value: "))
-            except ValueError:
-                print("Invalid input. Please enter a numeric value.")
-                tau = None #force loop to continue
+        if tau is None or tau <= 0:
+            raise ValueError(f"Tau must be positive. Got: {tau}")
         self.tau = tau
         self.a_actual = np.zeros(3)
     
