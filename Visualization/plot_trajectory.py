@@ -100,3 +100,91 @@ def plot_3d_trajectory(history):
     #SHOW IT CLEANLY
     plt.tight_layout()
     plt.show()
+
+    #COMPARISON PLOT FOR ALL GUIDANCE LAWS ON ONE TRAJECTORY PLOT
+def plot_3d_comparison(results):
+    modes = ["PN", "APN", "ZEM"]
+    colors = {"PN": "blue", "APN": "orange", "ZEM": "green"}
+
+    #GRAB TARGET TRAJECTORY FROM PN RESULT (CONSTANT)
+    longest_mode = max(modes, key = lambda m: len(results[m]["history"]))
+    xt = np.array([step["target_pos"] for step in results[longest_mode]["history"]])
+
+    #PRELOAD INTERCEPTOR TRAJECTORIES
+    xi = {mode:np.array([step["interceptor_pos"] for step in results[mode]["history"]]) for mode in modes}
+
+    #INITIALIZE PLOT
+    fig = plt.figure()
+    panel = fig.add_subplot(111, projection = '3d')
+
+    #PLOT FULL TRAJECTORIES FAINTLY
+    panel.plot(xt[:,0], xt[:,1], xt[:,2], color = "red", alpha = .2) 
+    for mode in modes: 
+        panel.plot(xi[mode][:,0], xi[mode][:,1], xi[mode][:,2], color = colors[mode], alpha = .2)
+
+    #INTERCEPTOR DOTS
+    target_body = panel.plot([], [], [], 'o', color = "red", markersize = 6)[0]
+    interceptor_bodies = {
+        mode: panel.plot([], [], [], 'o', color = colors[mode], markersize = 6)[0]
+        for mode in modes
+    }
+
+    #TIME TEXT
+    time_text = panel.text(.95,.95,0,"",ha = "right", va = "top", fontsize = 12)
+
+    #SET LABELS
+    panel.set_xlabel("X (m)")
+    panel.set_ylabel("Y (m)")
+    panel.set_zlabel("Z (m)")
+    panel.set_title("Guidance Law Comparison")
+
+    #LEGEND
+    legend_elements = [
+        plt.Line2D([0], [0], color="red",    lw=2, label="Target"),
+    plt.Line2D([0], [0], color="blue",   lw=2, label="PN"),
+    plt.Line2D([0], [0], color="orange", lw=2, label="APN"),
+    plt.Line2D([0], [0], color="green",  lw=2, label="ZEM"),
+    ]
+    panel.legend(handles=legend_elements, loc='upper left')
+
+    #MAX FRAMES IS THE LONGEST RUN
+    max_frames = max(len(xi[mode]) for mode in modes)
+    t_ref = results[longest_mode]["history"]
+
+    #ANIMATION UPDATE FUNCTION
+    def update(i):
+        #TARGET UPDATE
+        idx_t = min(i, len(xt) -1)
+        target_body.set_data_3d([xt[idx_t,0]], [xt[idx_t,1]], [xt[idx_t,2]])
+
+        #INTERCEPTORS UPDATE
+        all_pts = [xt[idx_t]]
+        for mode in modes:
+            idx_i = min(i, len(xi[mode])-1)
+            interceptor_bodies[mode].set_data_3d(
+                [xi[mode][idx_i,0]], 
+                [xi[mode][idx_i,1]], 
+                [xi[mode][idx_i,2]]
+            )
+            all_pts.append(xi[mode][idx_i])
+        
+        #DYNAMIX AXIS SIZING AROUND ALL POINTS
+        all_pts = np.array(all_pts)
+        mid = all_pts.mean(axis=0)
+        spread = np.max(np.linalg.norm(all_pts-mid, axis=1))
+        half = spread + max(spread*.3, 20.0)
+        panel.set_xlim(mid[0] - half, mid[0] + half)
+        panel.set_ylim(mid[1] - half, mid[1] + half)
+        panel.set_zlim(mid[2] - half, mid[2] + half)
+
+        #TIME
+        time_text.set_text(f"t = {t_ref[min(i, len(t_ref)-1)]['t']:.2f} s")
+
+        return (*interceptor_bodies.values(), target_body, time_text)
+    
+    #RUN ANIMATION
+    anim = FuncAnimation(fig, update, frames = max_frames, interval = settings.plot_interval_ms, blit = False)
+
+    #SHOW IT CLEANLY
+    plt.tight_layout()
+    plt.show()

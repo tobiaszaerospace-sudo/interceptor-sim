@@ -11,7 +11,7 @@ from Simulation.los_rate import compute_los_rate
 from Config.settings import settings
 
 #SIMULATION FUNCTION
-def run_simulator(settings):
+def run_simulator(settings, ic_override = None):
     #RUNS A SINGLE SIMULATION WITH GUIDANCE LAW, WILL RETURN DICTIONARY
     #INITIALIZE SIMULATION PARAMETERS
     dt = settings.dt
@@ -22,9 +22,15 @@ def run_simulator(settings):
     N = settings.N
 
     #INITIAL CONDITIONS
-    ic = InitialConditions()
-    ri0, vi0 = ic.build_interceptor()
-    target_data = ic.build_target()
+    #CHECK FOR MULTIPLE SIMULATION PLOT
+    if ic_override is not None:
+        ri0 = ic_override["ri0"]
+        vi0 = ic_override["vi0"]
+        target_data = ic_override["target_data"]
+    else:
+        ic = InitialConditions()
+        ri0, vi0 = ic.build_interceptor()
+        target_data = ic.build_target()
     mode = settings.guidance_mode.upper()
     while mode not in ["PN", "APN", "ZEM"]:
         mode = input("Enter a correct mode: ").upper()
@@ -44,11 +50,20 @@ def run_simulator(settings):
     hit = False
     history = []
 
+    #INITIALIZE MISS DISTANCE
+    min_range = float(1e99)
+    min_range_time = 0.0
+
     #START LOOP
     while t < t_max:
 
         #RELATIVE KINEMATICS
         r_rel, v_rel, Range, r_hat, Vc = compute_relative_kinematics(target, interceptor)
+
+        #UPDATE MINIMUM RANGE
+        if Range < min_range:
+            min_range = Range
+            min_range_time = t
 
         #CHECK FOR DIRECT HIT
         if Range <= kill_radius:
@@ -127,7 +142,7 @@ def run_simulator(settings):
     return{
         "model" : mode,
         "hit" : hit,
-        "miss_distance" : miss_distance,
+        "miss_distance" : min_range,
         "t_final" : t,
         "avg_accel" : avg_accel,
         "peak_accel" : peak_accel,
