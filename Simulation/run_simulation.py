@@ -49,6 +49,6 @@ def run_simulation():
     print(f"Average Acceleration: {result['avg_accel']:.3f} m/s^2")
 
     #PLOT TRAJECTORY
-    plot_3d_trajectory(result['history'], kill_radius)
+    plot_3d_trajectory(result['history'])
 
     return result

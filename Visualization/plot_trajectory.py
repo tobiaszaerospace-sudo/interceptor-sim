@@ -26,7 +26,7 @@ def orientation_from_velocity(v):
 
 
 #PLOTTING FUNCTION FOR THE 3D TRAJECTORY
-def plot_3d_trajectory(history, kill_radius):
+def plot_3d_trajectory(history):
 
     #GRAB POSITIONS
     xi = np.array([step["interceptor_pos"] for step in history])
@@ -39,14 +39,6 @@ def plot_3d_trajectory(history, kill_radius):
     #TIME STEP
     t_vals = [step["t"] for step in history]
 
-    #MISSILE SHAPED MARKER FOR ANIMATION
-    missile_shape = np.array([
-        [0,0,1.5],  #NOSE
-        [-.3,0,-1], #LEFT FIIN
-        [.3,0,-1],  #RIGHT FIN
-        [0,0,-1]    #TAIL
-    ])
-
     #INITIALIZE PLOTTING WINDOW
     fig = plt.figure()
     panel = fig.add_subplot(111, projection='3d')
@@ -56,8 +48,8 @@ def plot_3d_trajectory(history, kill_radius):
     panel.plot(xt[:,0], xt[:,1], xt[:,2], color = "red", alpha = .2)
 
     #MISSILE BODIES AS LINE3D OBJECTS
-    interceptor_body, = panel.plot([], [], [], color = "blue", linewidth = 2)
-    target_body, = panel.plot([], [], [], color = "red", linewidth = 2)
+    interceptor_body, = panel.plot([], [], [], 'o', color = "blue", linewidth = 2)
+    target_body, = panel.plot([], [], [], 'o', color = "red", linewidth = 2)
 
     #TIME TEXT IN TOP CORNER
     time_text = panel.text(0.95, 0.95, 0, "", ha = "right", va = "top", fontsize = 12)
@@ -75,55 +67,32 @@ def plot_3d_trajectory(history, kill_radius):
     panel.set_xlim(mid[0] - max_range/2, mid[0] + max_range/2)
     panel.set_ylim(mid[1] - max_range/2, mid[1] + max_range/2)
     panel.set_zlim(mid[2] - max_range/2, mid[2] + max_range/2)
-
-    #SPHERE MESH
-    u,v = np.mgrid[0:2*np.pi:40j, 0:np.pi:20j]
-    xs = kill_radius * np.cos(u)*np.sin(v)
-    ys = kill_radius * np.sin(u) * np.sin(v)
-    zs = kill_radius * np.cos(v)
-
-    #INITIAL SPHERE
-    sphere = panel.plot_surface(xs + xt[0,0],
-                       ys + xt[0,1],
-                       zs + xt[0,2],
-                       color="yellow", alpha=0.35, label = "_nolegend_")
     
     legend_elements = [plt.Line2D([0], [0], color='blue', lw=2, label='Interceptor'),
-                          plt.Line2D([0], [0], color='red', lw=2, label='Target'),
-                          Patch(facecolor='yellow', edgecolor='yellow', alpha=0.5, label=f'Kill Radius ({kill_radius} m)')]
+                          plt.Line2D([0], [0], color='red', lw=2, label='Target')]
+    
     panel.legend(handles=legend_elements, loc='upper left')
 
     #ANIMATION UPDATE FUNCTION
     def update(i):
-        nonlocal sphere
 
-        #REMOVE OLE SPHERE
-        sphere.remove()
-
-        #DRAW A NEW SPHERE CENTERED AT TARGET POSITION
-        sphere = panel.plot_surface(xs+xt[i,0],
-                                    ys + xt[i,1],
-                                    zs + xt[i,2],
-                                    color = "yellow", alpha = .15)
-
-        #INTERCEPTOR ORIENTATION
-        Rotation_i = orientation_from_velocity(vi[i])
-        missile_i = (Rotation_i @ missile_shape.T).T + xi[i]
-        interceptor_body.set_data_3d(missile_i[:,0],
-                                     missile_i[:,1],
-                                     missile_i[:,2])
+        #UPDATE INTERCEPTOR AND TARGET POSITION
+        interceptor_body.set_data_3d([xi[i,0]], [xi[i,1]], [xi[i,2]])
+        target_body.set_data_3d([xt[i,0]], [xt[i,1]], [xt[i,2]])
         
-        #TARGET ORIENTATION
-        Rotation_t = orientation_from_velocity(vt[i])
-        missile_t = (Rotation_t @ missile_shape.T).T + xt[i]
-        target_body.set_data_3d(missile_t[:,0],
-                                     missile_t[:,1],
-                                     missile_t[:,2])
-        
+        #DYNAMIC AXIS SIZING
+        spread = np.linalg.norm(xi[i] - xt[i]) * 1.5
+        padding = max(spread * .3,20)
+        mid = (xi[i] + xt[i]) / 2
+        half = spread/2+padding
+        panel.set_xlim(mid[0] - half, mid[0] + half)
+        panel.set_ylim(mid[1] - half, mid[1] + half)
+        panel.set_zlim(mid[2] - half, mid[2] + half)
+
         #TIME TEXT
         time_text.set_text(f"t = {t_vals[i]:.2f} s")
 
-        return interceptor_body, target_body, time_text, sphere
+        return interceptor_body, target_body, time_text
 
     #RUN ANIMATION
     anim = FuncAnimation(fig, update, frames = len(history), interval = settings.plot_interval_ms, blit = False)
