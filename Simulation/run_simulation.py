@@ -4,6 +4,7 @@ from Config.settings import settings
 from Simulation.simulate import run_simulator
 from Visualization.plot_trajectory import plot_3d_trajectory
 kill_radius = settings.kill_radius
+from Visualization.plot_guidance import plot_guidance_analysis
 
 #NO NEED FOR CLASS, CAN JUST USE FUNCTION
 def run_simulation():
@@ -50,5 +51,7 @@ def run_simulation():
 
     #PLOT TRAJECTORY
     plot_3d_trajectory(result['history'])
+    #PLOT GUIDANCE ANALYSIS
+    plot_guidance_analysis(result['history'], title_suffix = result['model'])
 
     return result
