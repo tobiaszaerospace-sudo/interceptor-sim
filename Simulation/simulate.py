@@ -11,7 +11,7 @@ from Simulation.los_rate import compute_los_rate
 from Config.settings import settings
 
 #SIMULATION FUNCTION
-def run_simulator(settings, ic_override = None):
+def run_simulator(settings, ic_override = None, save_history = True):
     #RUNS A SINGLE SIMULATION WITH GUIDANCE LAW, WILL RETURN DICTIONARY
     #INITIALIZE SIMULATION PARAMETERS
     dt = settings.dt
@@ -54,6 +54,12 @@ def run_simulator(settings, ic_override = None):
     min_range = float(1e99)
     min_range_time = 0.0
 
+    #INITIALIZE SATURATION COUNTER
+    saturated_steps = 0
+    total_steps = 0
+    accel_sum = 0.0
+    peak_accel_running = 0.0
+
     #START LOOP
     while t < t_max:
 
@@ -74,7 +80,8 @@ def run_simulator(settings, ic_override = None):
         if Vc < 0:
             div_counter += 1
             if div_counter >= div_count:
-                print("Divergence detected, ending simulation.")
+                if settings.debug:
+                    print("Divergence detected, ending simulation.")
                 break
         else:
             div_counter = 0
@@ -93,6 +100,17 @@ def run_simulator(settings, ic_override = None):
         #AUTOPILOT CORRECTION
         a_actual = autopilot.update(a_command, dt)
         interceptor.set_acceleration(a_actual)
+
+        #TRACK SATURATION
+        accel_mag_actual = np.sqrt(a_actual[0]**2+a_actual[1]**2+a_actual[2]**2)
+        total_steps += 1
+        if accel_mag_actual >= max_accel*.99:
+            saturated_steps += 1
+        
+        #ACCEL ACCUMULATION FOR INDEPENDENCE OF SAVE HISTORY
+        accel_sum += accel_mag_actual
+        if accel_mag_actual > peak_accel_running:
+            peak_accel_running = accel_mag_actual
 
         if settings.debug:
             print(
@@ -119,7 +137,8 @@ def run_simulator(settings, ic_override = None):
             "a_actual" : a_actual.copy(),
             "accel_mag" : np.sqrt(a_actual[0]**2 + a_actual[1]**2 + a_actual[2]**2),
         }
-        history.append(step)
+        if save_history:
+            history.append(step)
 
         #INTERCEPTOR DYNAMICS
         interceptor.step_rk4(dt, a_actual)
@@ -134,9 +153,26 @@ def run_simulator(settings, ic_override = None):
     miss_distance = Range  
 
     #ACCELERATION STATS
-    accel_mags = [step["accel_mag"] for step in history]
-    avg_accel = float(np.mean(accel_mags)) if accel_mags else 0.0
-    peak_accel = float(np.max(accel_mags)) if accel_mags else 0.0                   
+    if history:
+        accel_mags = [step["accel_mag"] for step in history]
+        avg_accel = float(np.mean(accel_mags))
+        peak_accel = float(np.max(accel_mags))
+    else:
+        avg_accel = accel_sum / total_steps if total_steps else 0.0
+        peak_accel = peak_accel_running
+
+    #SATURATION FRACTION
+    saturation_fraction = saturated_steps / total_steps if total_steps else 0.0                  
+
+    #TERMINATION REASONING
+    if hit:
+        termination_reason = "hit"
+    elif div_counter >= div_count:
+        termination_reason = "diverged"
+    elif Vc > 0:
+        termination_reason = "timeout_closing"
+    else:
+        termination_reason = "timeout_receding"
 
     #RETURN LIBRARY FULL OF DATA
     return{
@@ -146,5 +182,7 @@ def run_simulator(settings, ic_override = None):
         "t_final" : t,
         "avg_accel" : avg_accel,
         "peak_accel" : peak_accel,
+        "saturation_fraction" : saturation_fraction,
+        "termination_reason" : termination_reason,
         "history" : history,
     }
