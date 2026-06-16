@@ -2,28 +2,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.animation import FuncAnimation
 import numpy as np
-from matplotlib.patches import Patch
 from Config.settings import settings
-
-# 3D ORIENTATION FROM VELOCITY
-def orientation_from_velocity(v):
-    #NORMAL IS NOW THE FORWARD DIRECTION
-    fwd = v / (np.linalg.norm(v) + 1e-9)
-
-    #WORLD UP VECTOR
-    world_up = np.array([0,0,1])
-
-    #RIGHT VECTOR
-    right = np.cross(world_up, fwd)
-    right /= (np.linalg.norm(right) + 1e-9)
-
-    #COMPUTE TRUE UP VECTOR
-    up = np.cross(fwd, right)
-
-    #ROTATION MATRIX COLUMNS (RIGHT, UP, FORWARD)
-    R = np.column_stack((right, up, fwd))
-    return R
-
 
 #PLOTTING FUNCTION FOR THE 3D TRAJECTORY
 def plot_3d_trajectory(history):

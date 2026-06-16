@@ -8,6 +8,7 @@ from Config.settings_menu import run_settings_menu
 from Simulation.run_simulation import run_simulation
 from Simulation.model_comparison import run_comparison
 from Simulation.monte_carlo import run_monte_carlo, summarize_monte_carlo
+from Visualization.plot_monte_carlo import plot_monte_carlo
 
 #OPTION 5: EXIT
 def exit_program():
@@ -61,7 +62,8 @@ def main():
                     print("Invalid input. Using default seed 0")
                     seed = 0                
             mc_output = run_monte_carlo(n_trials = n_trials, master_seed = seed)
-            summarize_monte_carlo(mc_output)
+            summary = summarize_monte_carlo(mc_output)
+            plot_monte_carlo(mc_output, summary)
         elif choice == "6":
             run_settings_menu()
         else:
