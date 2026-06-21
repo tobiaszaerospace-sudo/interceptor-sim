@@ -101,7 +101,7 @@ def run_monte_carlo(n_trials = 500, modes = None, master_seed = 0, convergence_c
                     "avg_accel"     :   0.0,
                     "t_final"       :   0.0,
                     "saturation_fraction"   :   0.0,
-                    "termination_reaason"   :   "error",
+                    "termination_reason"   :   "error",
                     "error"         :   str(e)
                 }
             

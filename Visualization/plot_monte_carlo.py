@@ -196,7 +196,7 @@ def _plot_saturation(ax, results, modes):
 
     #INTERPRETATION
     ax.text(.98,.05,"Fraction of flight at max accel.\nHigh means no control margin remaining",
-                transform = ax.transAxes, fontsize = 7, ha = "left", va = "top", bbox = dict(boxstyle="round,pad=.3", facecolor="lightyellow", alpha=.8))
+                transform = ax.transAxes, fontsize = 7, ha = "right", va = "top", bbox = dict(boxstyle="round,pad=.3", facecolor="lightyellow", alpha=.8))
 
     ax.grid(True, alpha = .3, axis = "y")
 
