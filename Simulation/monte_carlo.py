@@ -26,7 +26,7 @@ def wilson_ci(hits, n, z=1.96):
 
 
 #MONTE CARLO RUNNER
-def run_monte_carlo(n_trials = 500, modes = None, master_seed = 0, convergence_checkpoints = 10):
+def run_monte_carlo(n_trials = 500, modes = None, master_seed = 0, convergence_checkpoints = 10, ic_overrides = None, N = None, N_zem = None, quiet = False):
     #CHECK FOR IF MODES GOT PASSED THROUGH
     if modes is None:
         modes = ["PN", "APN", "ZEM"]
@@ -34,7 +34,7 @@ def run_monte_carlo(n_trials = 500, modes = None, master_seed = 0, convergence_c
     rng = np.random.default_rng(master_seed)
 
     #GENERATE ALL ICs FIRST SO EVERY GUIDANCE LAW HAS SAME ENGAGEMENT
-    ics = [InitialConditions.build_random_ic(rng) for _ in range(n_trials)]
+    ics = [InitialConditions.build_random_ic(rng, overrides = ic_overrides) for _ in range(n_trials)]
 
     #CONVERGENCE CHECKPOINT COMPUTATION
     checkpoint_indeces = set(int(idx) for idx in np.linspace(0,n_trials-1,convergence_checkpoints))
@@ -49,14 +49,16 @@ def run_monte_carlo(n_trials = 500, modes = None, master_seed = 0, convergence_c
     convergence = {mode: [] for mode in modes}
 
     #FORMAT THE TABLE
-    print(f"\n=== Monte Carlo Analysis ===")
-    print(f"Trials:{n_trials}   |   Modes: {modes}  |   Seed: {master_seed}")
-    print("-"*60)
+    if not quiet:
+        print(f"\n=== Monte Carlo Analysis ===")
+        print(f"Trials:{n_trials}   |   Modes: {modes}  |   Seed: {master_seed}")
+        print("-"*60)
 
     #RUN THROUGH LOOPS FOR SIMULATIONS
     for mode in modes:
         settings.guidance_mode = mode
-        print(f"Running {mode}...", end="", flush=True)
+        if not quiet:
+            print(f"Running {mode}...", end="", flush=True)
 
         #TIMER FOR MODE'S TRIAL LOOP
         start_time = time.time()
@@ -72,7 +74,7 @@ def run_monte_carlo(n_trials = 500, modes = None, master_seed = 0, convergence_c
             #FOR REGULAR RUNS
             try:
                 #RUN ENGAGEMENT 
-                out = run_simulator(settings, ic_override = ic, save_history = save_hist)
+                out = run_simulator(settings, ic_override = ic, save_history = save_hist, N = N, N_zem = N_zem)
                 trial = {
                     "trial"         :   i,
                     "mode"          :   mode,
@@ -128,11 +130,13 @@ def run_monte_carlo(n_trials = 500, modes = None, master_seed = 0, convergence_c
         misses = [t["miss_distance"] for t in results[mode] if not t["hit"] and not np.isnan(t["miss_distance"])]
         med_miss = np.median(misses) if misses else np.nan
         #DISPLAY IMMEDIATE HIT RATE AND MED MISS RESULTS
-        print(f"Done. Hit rate: {hit_rate:.1f}%     |    Median miss: {med_miss:.2f}m")
+        if not quiet:
+            print(f"Done. Hit rate: {hit_rate:.1f}%     |    Median miss: {med_miss:.2f}m")
     
     #FORMAT STUFF
-    print("-"*60)
-    print("Monte Carlo complete.\n")
+    if not quiet:
+        print("-"*60)
+        print("Monte Carlo complete.\n")
     return {
         "results"   :   results,
         "convergence"   :   convergence,
@@ -287,8 +291,11 @@ def summarize_monte_carlo(mc_output):
                       ("weaving", "Weave")]:
         parts = []
         for mode in modes:
-            bd = summary[mode]['motion_breakdown'].get(mt, {"hit_rate":0})
-            parts.append(f"{mode}: {bd['hit_rate']:.1f}%")
+            bd = summary[mode]['motion_breakdown'].get(mt)
+            if bd is None:
+                parts.append(f"{mode}: N/A (n=0)")
+            else:
+                parts.append(f"{mode}: {bd['hit_rate']:.1f}%")
         print(f"    {label}: " + "  |   ".join(parts))
     print("-"*60 + "\n")
 

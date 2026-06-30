@@ -11,7 +11,7 @@ from Simulation.los_rate import compute_los_rate
 from Config.settings import settings
 
 #SIMULATION FUNCTION
-def run_simulator(settings, ic_override = None, save_history = True):
+def run_simulator(settings, ic_override = None, save_history = True, N = None, N_zem = None):
     #RUNS A SINGLE SIMULATION WITH GUIDANCE LAW, WILL RETURN DICTIONARY
     #INITIALIZE SIMULATION PARAMETERS
     dt = settings.dt
@@ -19,7 +19,9 @@ def run_simulator(settings, ic_override = None, save_history = True):
     kill_radius = settings.kill_radius
     max_accel = settings.max_accel
     tau = settings.tau
-    N = settings.N
+    #CHANGED N AND N_ZEM FOR SECONDARY MONTE CARLO ABILITY
+    N = settings.N if None else N
+    N_zem = settings.N_zem if N_zem is None else N_zem
 
     #INITIAL CONDITIONS
     #CHECK FOR MULTIPLE SIMULATION PLOT
@@ -38,7 +40,7 @@ def run_simulator(settings, ic_override = None, save_history = True):
     #OBJECTS
     target = Target(target_data["initial_position"], target_data["initial_velocity"], target_data["motion_model"], target_data["params"])
     interceptor = Interceptor(ri0, vi0)
-    guidance = Guidance(N=N)
+    guidance = Guidance(N=N, N_zem = N_zem)
     autopilot = Autopilot(max_accel = max_accel, tau = tau)
 
     #DIVERGENCE CHECK
@@ -175,7 +177,7 @@ def run_simulator(settings, ic_override = None, save_history = True):
         termination_reason = "timeout_receding"
 
     #RETURN LIBRARY FULL OF DATA
-    return{
+    return {
         "model" : mode,
         "hit" : hit,
         "miss_distance" : min_range,
@@ -184,5 +186,7 @@ def run_simulator(settings, ic_override = None, save_history = True):
         "peak_accel" : peak_accel,
         "saturation_fraction" : saturation_fraction,
         "termination_reason" : termination_reason,
+        "N"     :   N,
+        "N_zem" :   N_zem,
         "history" : history,
     }

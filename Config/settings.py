@@ -24,6 +24,7 @@ class Settings:
         self.plot_interval_ms = 30
         #GUIDANCE SETTINGS
         self.N = 3.0
+        self.N_zem = 3.0
         self.max_accel = 100.0
         self.tau = .05
         self.div_count = 10

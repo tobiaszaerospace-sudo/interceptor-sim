@@ -142,9 +142,16 @@ class InitialConditions:
     #BUILD RANDOM IC's FOR MONTE CARLO SIMULATION
     #RNG HERE IS NOT RANGE! IT STAND FOR RANDOM NUMBER GENERATOR, WHICH HAS SEEDS FOR REPEATIBILITY
     @staticmethod
-    def build_random_ic(rng):
+    def build_random_ic(rng, overrides = None):
+        #NORMALIZE TO EMPTY DICT SO DON'T NEED AS MANY NONE CHECKS
+        if overrides is None:
+            overrides = {}
+        
         #TARGET WITH RANDOM RANGE, POSITION, AND HEADING
-        R_target = rng.uniform(500.0,3000.0)
+        if "R_target" in overrides:
+            R_target = overrides["R_target"]
+        else:
+            R_target = rng.uniform(500.0,3000.0)
         yaw_t = rng.uniform(-np.pi, np.pi)
         pitch_t = rng.uniform(-np.pi/6,np.pi/6)
         rt0 = [
@@ -154,11 +161,16 @@ class InitialConditions:
         ]
 
         #INTERCEPTOR AT ORIGIN WITH RANDOM SPEED AND POINTING AT TARGET WITH DEVIATION
-        Vi = rng.uniform(150.0,400.0)
+        if "Vi" in overrides:
+            Vi = overrides["Vi"]
+        else:
+            Vi = rng.uniform(150.0,400.0)
+        #POINTING ERROR VALUE
+        pointing_error_rad = np.radians(overrides.get("pointing_error_deg", 20.0))
         los_yaw = np.arctan2(rt0[1], rt0[0])
         los_pitch = np.arctan2(rt0[2], np.sqrt(rt0[0]**2+rt0[1]**2))
-        yaw_i = los_yaw + rng.uniform(-np.radians(20),np.radians(20))
-        pitch_i = los_pitch + rng.uniform(-np.radians(20), np.radians(20))
+        yaw_i = los_yaw + rng.uniform(-pointing_error_rad, pointing_error_rad)
+        pitch_i = los_pitch + rng.uniform(-pointing_error_rad, pointing_error_rad)
         ri0 = [0,0,0]
         vi0 = [
             Vi * np.cos(pitch_i) * np.cos(yaw_i),
@@ -176,6 +188,8 @@ class InitialConditions:
             Vt * np.sin(pitch_tv)
         ]
 
+        #SEVERITY MULTIPLIER
+        severity_mult = overrides.get("severity_mult", 1.0)
         #TARGET MOTION MODEL, HALF WEAVING AND EVEN SPLIT BETWEEN CV/CA
         motion_roll = rng.uniform(0.0,1.0)
         if motion_roll < .25:
@@ -183,14 +197,14 @@ class InitialConditions:
             params = {}
         elif motion_roll <.5:
             motion_type = "constant_acceleration"
-            a_mag = rng.uniform(20.0,60.0)
+            a_mag = rng.uniform(20.0,60.0) * severity_mult
             a_dir = rng.standard_normal(3)
             a_dir /= np.linalg.norm(a_dir) #UNIT VECTOR
             params = {"accel": (a_mag*a_dir).tolist()}
         else:
             motion_type = "weaving"
             params = {
-                "amplitude": rng.uniform(20.0,79.0),
+                "amplitude": rng.uniform(20.0,79.0) * severity_mult,
                 "omega": rng.uniform(.5,3.0),
                 "axis": rng.choice(["x", "y", "z"])
             }

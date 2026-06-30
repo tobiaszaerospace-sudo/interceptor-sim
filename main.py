@@ -9,6 +9,7 @@ from Simulation.run_simulation import run_simulation
 from Simulation.model_comparison import run_comparison
 from Simulation.monte_carlo import run_monte_carlo, summarize_monte_carlo
 from Visualization.plot_monte_carlo import plot_monte_carlo
+from Simulation.menu_sweep import menu_sweep
 
 #OPTION 5: EXIT
 def exit_program():
@@ -25,11 +26,12 @@ def main():
         print("3. Gimbal Calibration")
         print("4. Model Comparison")
         print("5. Monte-Carlo Simulation")
-        print("6. Settings")
-        print("7. Exit")
-        choice = input("Enter your choice (1-7): ").strip()
-        while choice not in ["1", "2", "3", "4", "5", "6", "7"]:
-            print("Invalid input. Please enter a number between 1 and 7.")
+        print("6. Monte-Carlo across one variable(Sweep)")
+        print("7. Settings")
+        print("8. Exit")
+        choice = input("Enter your choice (1-8): ").strip()
+        while choice not in ["1", "2", "3", "4", "5", "6", "7", "8"]:
+            print("Invalid input. Please enter a number between 1 and 8.")
             choice = input("Enter your choice (1-7): ").strip()
         if choice == "1":
             run_gimbal_tracking()
@@ -40,7 +42,7 @@ def main():
         elif choice == "4":
             run_comparison()
         elif choice == "5":
-            n_trials = input("Enter number of tirals per guidance mode (default 500): ").strip()
+            n_trials = input("Enter number of trials per guidance mode (default 500): ").strip()
             if n_trials == "":
                 n_trials = 500
             else:
@@ -52,7 +54,7 @@ def main():
                 except ValueError:
                     print("Invalid input. Using default 500.")
                     n_trials = 500
-            seed_input = input("Enter random seed (defualt 0): ").strip()
+            seed_input = input("Enter random seed (default 0): ").strip()
             if seed_input == "":
                 seed = 0
             else:
@@ -65,6 +67,8 @@ def main():
             summary = summarize_monte_carlo(mc_output)
             plot_monte_carlo(mc_output, summary)
         elif choice == "6":
+            menu_sweep()
+        elif choice == "7":
             run_settings_menu()
         else:
             exit_program()

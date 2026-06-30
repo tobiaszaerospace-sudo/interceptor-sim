@@ -1,0 +1,41 @@
+#SUMMARY OF THE DAY
+#Worklog of everything completed over the time away from not logging
+
+#TASKS COMPLETED
+#   Task 1 - Monte carlo subsystem, miss distance bug, IC heading bug, divergence-break bug all built/fixed
+#
+#   Task 2 - Built sensitivity sweep subsystem with 5 sweep variables, including preset/custom ranges, trial count by direct n or by target Wilson Confidence Interval half-width
+#
+#   Task 3 - Wired N/N_zem as real parameters through run_simulator/run_monte_carlo, wired sweep into main menu
+#
+#   Task 4 - Verified APN/ZEM near-equivalence analytically and numerically, derived why on paper, same acceleration command
+#
+#   Task 5 - Starting analytical validation, deriving from linearized PN ZEM decay law from Zarchan paper
+
+#TECHNICAL INSIGHTS/DISCOVERIES FROM RESEARCH
+#   Takeaway - Wilson CI half-width is worst-case at p=.5
+#   Source   - Wilson, E.B. (1927), J. American Statistical Association, 22(158)
+#
+#   Takeaway - Ideal PN vs constant-velocity target = ZEM0*)t_go/t_go0)^N, decays to zero
+#   Source   - Derived from first principles, verified numerically, need to cross check against textbook citation still
+
+
+#BLOCK/ISSUES FROM TODAY
+#   Issue          - So many
+#   Possible Cause - Didn't research problems, plotting graphs with matplotlib is annoying and I'm not experienced with it yet
+#   Solution?      - Researched problems, fixed them over time and enough reading
+
+#NEXT STEPS
+#   Need to Research - Read citation/page number for Zarchan's closed-form PN miss-distance equation if a textbook verified number is available
+#   Debugging        - N/A
+#   Need to Add      - Script to run run_simulator on a head-on CV IC, grab LOS rate/ZEM v time, fit log-log decay exponent, compare to N-1/N
+
+#ARTIFACTS GENERATED(Late Stage)
+#   Description     - N/A
+#   File Location   - N/A
+#   File Name       - N/A
+
+#GENERAL NOTES
+#   1) Gap from daily logs, work on this project takes place mainly during lunch breaks at work, late at night after family is asleep, or on weekends. Difficult to keep up, will try to be more consistent from now on
+#   2) 
+#   3)
