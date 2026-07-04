@@ -10,6 +10,8 @@ from Simulation.model_comparison import run_comparison
 from Simulation.monte_carlo import run_monte_carlo, summarize_monte_carlo
 from Visualization.plot_monte_carlo import plot_monte_carlo
 from Simulation.menu_sweep import menu_sweep
+from Simulation.validate_pn import run_validation
+from Visualization.plot_validation import plot_validation
 
 #OPTION 5: EXIT
 def exit_program():
@@ -27,12 +29,13 @@ def main():
         print("4. Model Comparison")
         print("5. Monte-Carlo Simulation")
         print("6. Monte-Carlo across one variable(Sweep)")
-        print("7. Settings")
-        print("8. Exit")
-        choice = input("Enter your choice (1-8): ").strip()
-        while choice not in ["1", "2", "3", "4", "5", "6", "7", "8"]:
-            print("Invalid input. Please enter a number between 1 and 8.")
-            choice = input("Enter your choice (1-7): ").strip()
+        print("7. Validation logic graph")
+        print("8. Settings")
+        print("9. Exit")
+        choice = input("Enter your choice (1-9): ").strip()
+        while choice not in ["1", "2", "3", "4", "5", "6", "7", "8", "9"]:
+            print("Invalid input. Please enter a number between 1 and 9.")
+            choice = input("Enter your choice (1-9): ").strip()
         if choice == "1":
             run_gimbal_tracking()
         elif choice == "2":
@@ -69,6 +72,9 @@ def main():
         elif choice == "6":
             menu_sweep()
         elif choice == "7":
+            results, ic = run_validation()
+            plot_validation(results, ic)
+        elif choice == "8":
             run_settings_menu()
         else:
             exit_program()
