@@ -6,7 +6,6 @@ from Simulation.simulate import run_simulator
 from Simulation.initial_conditions import InitialConditions
 from Visualization.plot_trajectory import plot_3d_comparison
 from Simulation.run_simulation import run_simulation
-from Config.settings import settings
 
 #NO NEED FOR CLASS, JUST FUNCTION FOR COMPARISON
 def run_comparison():
@@ -25,7 +24,9 @@ def run_comparison():
     results = {}
     for mode in modes:
         settings.guidance_mode = mode
-        results[mode] = run_simulator(settings, ic_override = fixed_ic)
+        results[mode] = run_simulator(settings, ic_override = fixed_ic, save_history = True, N = settings.N, N_zem = settings.N_zem)
+    #RESET TO DEFAULT - TRYING TO FIX BUG
+    settings.guidance_mode = "PN"
 
     #PRINT SUMMARY TABLE
     print("\n=== Guidance Law Comparison ===")

@@ -20,7 +20,7 @@ def run_simulator(settings, ic_override = None, save_history = True, N = None, N
     max_accel = settings.max_accel
     tau = settings.tau
     #CHANGED N AND N_ZEM FOR SECONDARY MONTE CARLO ABILITY
-    N = settings.N if None else N
+    N = settings.N if N is None else N
     N_zem = settings.N_zem if N_zem is None else N_zem
 
     #INITIAL CONDITIONS

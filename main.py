@@ -11,7 +11,10 @@ from Simulation.monte_carlo import run_monte_carlo, summarize_monte_carlo
 from Visualization.plot_monte_carlo import plot_monte_carlo
 from Simulation.menu_sweep import menu_sweep
 from Simulation.validate_pn import run_validation
+from Visualization.plot_trajectory import plot_3d_trajectory
 from Visualization.plot_validation import plot_validation
+from Visualization.plot_guidance import plot_guidance_analysis
+from csv_export import export_monte_carlo_csv
 
 #OPTION 5: EXIT
 def exit_program():
@@ -45,6 +48,7 @@ def main():
         elif choice == "4":
             run_comparison()
         elif choice == "5":
+            settings.guidance_mode = "PN"
             n_trials = input("Enter number of trials per guidance mode (default 500): ").strip()
             if n_trials == "":
                 n_trials = 500
@@ -69,6 +73,34 @@ def main():
             mc_output = run_monte_carlo(n_trials = n_trials, master_seed = seed)
             summary = summarize_monte_carlo(mc_output)
             plot_monte_carlo(mc_output, summary)
+            settings.guidance_mode = "PN"
+            #AFTER PLOTTING ASK IF THEY WANT TO SEE A SINGLE TRIAL
+            view = input("View a sample trajectory? (y/n): ").strip().lower()
+            if view == 'y':
+                print("Select mode:  1) PN   2) APN   3) ZEM")
+                mode_choice = input(" Choice: ").strip()
+                mode_dict = {
+                    "1": "PN",
+                    "2": "APN",
+                    "3": "ZEM"
+                }
+                mode = mode_dict.get(mode_choice, )
+                available = list(mc_output['sample_trajectories'][mode].keys())
+                print(f"Available trial indeces: {available}")
+                trial_input = input("Select trial index: ").strip()
+                try:
+                    trial_idx = int(trial_input)
+                except ValueError:
+                    trial_idx = available[0]
+                
+                history = mc_output['sample_trajectories'][mode][trial_idx]
+                plot_3d_trajectory(history)
+                plot_guidance_analysis(history, title_suffix = f" {mode} Trial {trial_idx}")
+                print("Do you want a csv export?(y/n):" )
+                export = input("").strip().lower()
+                if export == 'y':
+                    export_monte_carlo_csv(mc_output, summary)
+
         elif choice == "6":
             menu_sweep()
         elif choice == "7":

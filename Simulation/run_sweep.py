@@ -87,7 +87,7 @@ def trials_for_halfwidth(target_halfwidth_pts, p = .5, z = 1.96, n_max = 20000):
             hi = mid
         else:
             lo = mid + 1
-        return lo
+    return lo
     
 #MENU FUNCTION FOR EITHER N OR HALFWIDTH
 def resolve_trials_per_step(mode, value, p_assumed = .5):
@@ -128,7 +128,7 @@ def run_sweep(var_name, levels = None, trials_per_step = 75, modes = None, maste
     if modes is None:
         modes = ["PN", "APN", "ZEM"]
     if levels is None:
-        levels = build_sweep_levels
+        levels = build_sweep_levels(var_name)
     
     #GRAB OBJECT
     spec = Sweep_variables[var_name]

@@ -15,7 +15,7 @@ class Settings:
         #MODEL SETTINGS
         self.yolo_model_path = "yolov8n.pt"
         #SIMULATION SETTINGS
-        self.dt = .001
+        self.dt = .01
         self.t_max = 30
         self.kill_radius = 5    #METERS
         self.guidance_mode = "PN"
@@ -25,7 +25,7 @@ class Settings:
         #GUIDANCE SETTINGS
         self.N = 3.0
         self.N_zem = 3.0
-        self.max_accel = 100.0
+        self.max_accel = 150.0
         self.tau = .05
         self.div_count = 10
         #PLOTTING SETTINGS
