@@ -2,6 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
+from scipy.stats import chi2
 
 #GUIDANCE ANALYSIS PLOT
 def plot_guidance_analysis(history, title_suffix = ""):
@@ -86,6 +87,84 @@ def plot_guidance_analysis(history, title_suffix = ""):
 
     #CLEAN UP/SHOW PLOTS
     fig.suptitle(f"Guidance Analysis Plots{suf}", fontsize = 15, fontweight = "bold")
+    plt.tight_layout()
+    plt.show()
+
+    return fig
+
+#EKF TRUE VS ESTIMATE AND NEES CONSISTENCY PLOT
+def plot_ekf_analysis(history, title_suffix = ""):
+    #CHECK VALIDITY
+    valid = [s for s in history if s.get("r_est") is not None and s.get("nees") is not None]
+    if not valid:
+        print("No EKF data in this history (use_ekf was off for this run) - skipping EKF plot {f'   ({title_suffix})' if title_suffix else ''}.")
+        return None
+    
+    #GRAB ARRAYS FOR PLOTTING
+    t = np.array([s['t'] for s in valid])
+    range_true = np.array([s["range"] for s in valid])          
+    range_est = np.array([s["range_est"] for s in valid])      
+    r_rel = np.array([s["r_rel"] for s in valid])
+    r_est = np.array([s["r_est"] for s in valid])
+    v_rel = np.array([s["v_rel"] for s in valid]) 
+    v_est = np.array([s["v_est"] for s in valid])
+    nees = np.array([s["nees"] for s in valid])
+
+    #ESTIMATION ERROR MAGNITUDE
+    pos_error = np.linalg.norm(r_rel-r_est, axis=1)
+    vel_error = np.linalg.norm(v_rel-v_est, axis=1)
+
+    #NEES CONSISTENCY BOUNDS, 6 FOR 6-STATE FILTER
+    state_dim = 6
+    nees_lower = chi2.ppf(.025, state_dim)
+    nees_upper = chi2.ppf(.975, state_dim)
+
+    #TITLE SUFFIX
+    suf = f" - {title_suffix}" if title_suffix else ""
+
+    #4 PANL FIGURE
+    fig = plt.figure(figsize = (14,8))
+    gs = gridspec.GridSpec(2,2,figure=fig, hspace = .45, wspace = .35)
+
+    #PANEL 1, TRUE VS ESTIMATED RANGE
+    ax1 = fig.add_subplot(gs[0, 0])
+    ax1.plot(t, range_true, color = "navy", lw = 1.5, label = "True Range")
+    ax1.plot(t, range_est, color = "crimson", lw = 1.5, linestyle = "--", label = "EKF Estimated Range")
+    ax1.set_xlabel("Time (s)")
+    ax1.set_ylabel("Range (m)")
+    ax1.set_title(f"True vs Estimated Range{suf}")
+    ax1.legend(fontsize = 8)
+    ax1.grid(True, alpha = .35)
+
+    #PANEL 2, NEES OVER TIME
+    ax2 = fig.add_subplot(gs[0, 1])
+    ax2.plot(t, nees, color = "darkorange", lw = 1.2, label = "NEES")
+    ax2.axhline(state_dim, color = "black", linestyle = ":", lw = 1, label = f"Ideal ({state_dim})")
+    ax2.axhspan(nees_lower, nees_upper, color = "gray", alpha = .2, label = "95% Consistency Band")
+    ax2.set_xlabel("Time (s)")
+    ax2.set_ylabel("NEES")
+    ax2.set_title(f"NEES Filter Consistency{suf}")
+    ax2.legend(fontsize = 8)
+    ax2.grid(True, alpha = .35)
+
+    #PANEL 3, RAW POSITION ERROR IN METERS
+    ax3 = fig.add_subplot(gs[1, 0])
+    ax3.plot(t, pos_error, color = "teal", lw = 1.5)
+    ax3.set_xlabel("Time (s)")
+    ax3.set_ylabel("Position Error (m)")
+    ax3.set_title(f"Position Estimation Error vs Time{suf}")
+    ax3.grid(True, alpha = .35)
+
+    #PANEL 4, VELOCITY ESTIMATION ERROR
+    ax4 = fig.add_subplot(gs[1, 1])
+    ax4.plot(t, vel_error, color = "purple", lw = 1.5)
+    ax4.set_xlabel("Time (s)")
+    ax4.set_ylabel("Velocity Error (m/s)")
+    ax4.set_title(f"Velocity Estimation Error vs Time{suf}")
+    ax4.grid(True, alpha = .35)
+
+    #FINALIZE AND SHOW
+    fig.suptitle(f"EKF Performance Analysis{suf}", fontsize = 15, fontweight = "bold")
     plt.tight_layout()
     plt.show()
 

@@ -71,10 +71,13 @@ def run_monte_carlo(n_trials = 500, modes = None, master_seed = 0, convergence_c
             #ONLY SAVE FULL HISTORY FOR SAMPLED TRIAL INDECES
             save_hist = i in sample_indeces
 
+            #PER TRIAL SENSOR NOISE SEED
+            trial_seed = master_seed * 1_000_000 + i
+
             #FOR REGULAR RUNS
             try:
                 #RUN ENGAGEMENT 
-                out = run_simulator(settings, ic_override = ic, save_history = save_hist, N = N, N_zem = N_zem)
+                out = run_simulator(settings, ic_override = ic, save_history = save_hist, N = N, N_zem = N_zem, noise_seed = trial_seed)
                 trial = {
                     "trial"         :   i,
                     "mode"          :   mode,
@@ -84,6 +87,8 @@ def run_monte_carlo(n_trials = 500, modes = None, master_seed = 0, convergence_c
                     "peak_accel"    :   out["peak_accel"],
                     "avg_accel"     :   out["avg_accel"],
                     "t_final"       :   out["t_final"],
+                    "mean_nees"     :   out['mean_nees'],
+                    "final_nees"    :   out['final_nees'],
                     "saturation_fraction"   :   out['saturation_fraction'],
                     "termination_reason"    :   out["termination_reason"]
                 }
@@ -103,6 +108,8 @@ def run_monte_carlo(n_trials = 500, modes = None, master_seed = 0, convergence_c
                     "avg_accel"     :   0.0,
                     "t_final"       :   0.0,
                     "saturation_fraction"   :   0.0,
+                    "mean_nees"     :   None,
+                    "final_nees"    :   None,
                     "termination_reason"   :   "error",
                     "error"         :   str(e)
                 }
@@ -198,6 +205,11 @@ def summarize_monte_carlo(mc_output):
         tti_mean = np.mean(t_hits) if t_hits else np.nan
         tti_std = np.std(t_hits) if t_hits else np.nan
 
+        #NEES STATISTICS
+        nees_vals = [t["mean_nees"] for t in trials if t.get("mean_nees") is not None]
+        nees_mean = np.mean(nees_vals) if nees_vals else np.nan
+        nees_std = np.std(nees_vals) if nees_vals else np.nan
+
         #TERMINATION REASONING
         term_counts = {}
         for t in trials:
@@ -230,6 +242,8 @@ def summarize_monte_carlo(mc_output):
             "saturation_median" : sat_med,
             "tti_mean"          : tti_mean,
             "tti_std"           : tti_std,
+            "nees_mean"         : nees_mean,
+            "nees_std"          : nees_std,
             "termination_counts": term_counts,
             "motion_breakdown"  : motion_breakdown,
             "convergence"       : convergence[mode]

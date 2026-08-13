@@ -9,6 +9,17 @@ from Simulation.run_simulation import run_simulation
 
 #NO NEED FOR CLASS, JUST FUNCTION FOR COMPARISON
 def run_comparison():
+    #EKF MODE
+    ekf_choice = input("Enable EKF state estimation with sensor noise for this comparison? (y/n): ").strip().lower()
+    settings.use_ekf = (ekf_choice == 'y')
+    if settings.use_ekf:
+        imu_choice = input("Use real IMU hardware instead of synthetic noise? (y/n): ").strip().lower()
+        settings.use_imu = (imu_choice == 'y')
+        noise_seed = int(np.random.default_rng().integers(0, 1_000_000))
+        print(f"(using noise seed {noise_seed} for all three modes)")
+    else:
+        settings.use_imu = False
+        noise_seed = None
     #GENERATE INITIAL CONDITIOSN ONCE
     ic = InitialConditions()
     ri0, vi0 = ic.build_interceptor()
@@ -24,7 +35,7 @@ def run_comparison():
     results = {}
     for mode in modes:
         settings.guidance_mode = mode
-        results[mode] = run_simulator(settings, ic_override = fixed_ic, save_history = True, N = settings.N, N_zem = settings.N_zem)
+        results[mode] = run_simulator(settings, ic_override = fixed_ic, noise_seed = noise_seed)
     #RESET TO DEFAULT - TRYING TO FIX BUG
     settings.guidance_mode = "PN"
 

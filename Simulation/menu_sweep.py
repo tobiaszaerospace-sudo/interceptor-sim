@@ -2,6 +2,7 @@
 #IMPORT FILES
 from Simulation.run_sweep import run_sweep, build_sweep_levels, resolve_trials_per_step, Sweep_variables
 from Visualization.plot_sweep import plot_sweep
+from Config.settings import settings
 
 def menu_sweep():
 #GET VARIABLES
@@ -94,6 +95,15 @@ def menu_sweep():
         verbose = True
     else:
         verbose = False
+
+    #EKF/NOISE MODE
+    ekf_choice = input("Enable EKF state estimation with sensor noise? (y/n): ").strip().lower()
+    settings.use_ekf = (ekf_choice == 'y')
+    if settings.use_ekf:
+        imu_choice = input("Use real IMU hardware instead of synthetic noise? (y/n): ").strip().lower()
+        settings.use_imu = (imu_choice == 'y')
+    else:
+        settings.use_imu = False
 
     #CALCULATION AND PLOT
     sweep_output = run_sweep(var_name, levels=levels, trials_per_step=trials_per_step, master_seed=seed, verbose=verbose)

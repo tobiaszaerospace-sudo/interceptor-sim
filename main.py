@@ -70,6 +70,14 @@ def main():
                 except ValueError:
                     print("Invalid input. Using default seed 0")
                     seed = 0                
+            #EKF / SENSOR NOISE MODE
+            ekf_choice = input("Enable EKF state estimation with sensor noise? (y/n): ").strip().lower()
+            settings.use_ekf = (ekf_choice == 'y')
+            if settings.use_ekf:
+                imu_choice = input("Use real IMU hardware instead of synthetic noise? (y/n): ").strip().lower()
+                settings.use_imu = (imu_choice == 'y')
+            else:
+                settings.use_imu = False
             mc_output = run_monte_carlo(n_trials = n_trials, master_seed = seed)
             summary = summarize_monte_carlo(mc_output)
             plot_monte_carlo(mc_output, summary)

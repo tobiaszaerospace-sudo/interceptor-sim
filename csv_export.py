@@ -35,7 +35,7 @@ def export_monte_carlo_csv(mc_output, summary, export_dir = Default_export_dir):
 
     #FILE 1) PER-TRIAL RAW DATE. ONE ROW PER TRIAL PER MODE
     #ESTABLISH FIELDS
-    trial_fields = ["trial", "mode", "motion_type", "hit", "miss_distance", "peak_accel", "avg_accel", "t_final", "saturation_fraction", "termination_reason"]
+    trial_fields = ["trial", "mode", "motion_type", "hit", "miss_distance", "peak_accel", "avg_accel", "t_final", "saturation_fraction", "termination_reason", "mean_nees", "final_nees"]
     trial_rows = []
     
     #CYCLE THROUGH MODES AND APPEND
@@ -74,6 +74,8 @@ def export_monte_carlo_csv(mc_output, summary, export_dir = Default_export_dir):
             "saturation_median"  : round(s["saturation_median"], 3),
             "tti_mean"           : round(s["tti_mean"],        3) if s["tti_mean"] == s["tti_mean"] else "N/A",
             "tti_std"            : round(s["tti_std"],         3) if s["tti_std"]  == s["tti_std"]  else "N/A",
+            "nees_mean"          : round(s["nees_mean"], 3) if s["nees_mean"] == s["nees_mean"] else "N/A",
+            "nees_std"           : round(s["nees_std"], 3) if s["nees_std"] == s["nees_std"] else "N/A",
         })
 
     #SAVE

@@ -1,5 +1,7 @@
 #IMPORT LIBRARY
 import numpy as np
+import math
+import time
 #IMPORT ALL OTHER FILES
 from Simulation.initial_conditions import InitialConditions
 from Simulation.target import Target
@@ -9,9 +11,11 @@ from Simulation.guidance_palumbo import Guidance
 from Simulation.relative_kinematics import compute_relative_kinematics
 from Simulation.los_rate import compute_los_rate
 from Config.settings import settings
+from Simulation.sensor_noise import SensorNoise
+from Simulation.ekf import EKF
 
 #SIMULATION FUNCTION
-def run_simulator(settings, ic_override = None, save_history = True, N = None, N_zem = None):
+def run_simulator(settings, ic_override = None, save_history = True, N = None, N_zem = None, move_gimbal = False, gimbal_port = None, gimbal_buad = None, gimbal_rate_hz = 20, noise_seed = None):
     #RUNS A SINGLE SIMULATION WITH GUIDANCE LAW, WILL RETURN DICTIONARY
     #INITIALIZE SIMULATION PARAMETERS
     dt = settings.dt
@@ -56,11 +60,60 @@ def run_simulator(settings, ic_override = None, save_history = True, N = None, N
     min_range = float(1e99)
     min_range_time = 0.0
 
+    #NEES ACCUMULATOR FOR EKF
+    nees_sum = 0.0
+    nees_count = 0
+    last_nees = None
+
     #INITIALIZE SATURATION COUNTER
     saturated_steps = 0
     total_steps = 0
     accel_sum = 0.0
     peak_accel_running = 0.0
+
+    #CHECK GIMBAL AND IMU PHYSICAL SERIAL PORT
+    shared_ser = None
+    resolved_gimbal_port = gimbal_port or settings.servo_port
+    resolved_gimbal_baud = gimbal_buad or settings.servo_baud
+    ports_shared = (move_gimbal and settings.use_ekf and settings.use_imu and resolved_gimbal_port == settings.imu_port)
+
+    #IF THE PORTS ARE SHARED OPEN ONE CONNECTION FOR BOTH
+    if ports_shared:
+        try:
+            import serial as _serial
+            shared_ser = _serial.Serial(resolved_gimbal_port, resolved_gimbal_baud, timeout = .05)
+            time.sleep(2)
+            print(f"Shared gimbal/IMU serial connected on {resolved_gimbal_port}")
+        except Exception as e:
+            print(f"Shared serial connection failed: {e}. Continueing without hardware.")
+            shared_ser = None
+            move_gimbal = False
+            settings.use_imu = False
+    
+    #EKF AND SENSOR NOISE SETUP
+    if settings.use_ekf:
+        sensor = SensorNoise(settings, rng_seed = noise_seed, shared_ser = shared_ser)
+        ekf = EKF(dt = dt)
+    else:
+        sensor = None
+        ekf = None
+
+    #GIMBAL HARDWARE SETUP
+    servo = None
+    if move_gimbal:
+        try:
+            from Hardware.servo import ServoController
+            servo = ServoController(resolved_gimbal_port, resolved_gimbal_baud, ser = shared_ser)
+        except Exception as e:
+            print(f"Gimbal connection failed: {e}. Continuing wihtout hardware")
+            servo = None
+
+    #CALCULATE SIM STEPS FOR GIMBAL SERIAL WRITES, CAN'T KEEP UP WITH DT
+    gimbal_send_interval = max(1, int(round(1/(gimbal_rate_hz*dt))))
+    step_index = 0
+
+    #FIXED WALL-CLOCK REFERENCE FOR REAL TIME PACING
+    sim_start_wall = time.time() if servo is not None else None
 
     #START LOOP
     while t < t_max:
@@ -91,6 +144,25 @@ def run_simulator(settings, ic_override = None, save_history = True, N = None, N
         #LOS RATE
         los_rate = compute_los_rate(r_rel, v_rel, Range)
 
+        #IF EKF IS ENABLED, USE NOISY ESTIMATE
+        if settings.use_ekf:
+            meas = sensor.measure(r_rel)
+            ekf.predict()
+            ekf.update(meas["az_meas"], meas['el_meas'])
+            r_rel_g = ekf.r_est()
+            v_rel_g    = ekf.v_est()
+            Range_g    = ekf.range_est()
+            r_hat_g    = ekf.range_hat_est()
+            Vc_g       = ekf.Vc_est()
+            los_rate_g = compute_los_rate(r_rel_g, v_rel_g, Range_g)
+            nees       = ekf.nees(r_rel, v_rel)
+            nees_sum += nees
+            nees_count += 1
+            last_nees = nees
+        else:
+            r_rel_g, v_rel_g, Range_g, r_hat_g, Vc_g, los_rate_g = r_rel, v_rel, Range, r_hat, Vc, los_rate
+            nees = None
+            
         #LOGGING STATE AND RUNNING CALCULATION
         if mode == "PN":
             a_command = guidance.pn(r_hat, Vc, los_rate)
@@ -138,9 +210,31 @@ def run_simulator(settings, ic_override = None, save_history = True, N = None, N
             "a_command" : a_command.copy(),
             "a_actual" : a_actual.copy(),
             "accel_mag" : np.sqrt(a_actual[0]**2 + a_actual[1]**2 + a_actual[2]**2),
+            "r_est" :   r_rel_g.copy() if settings.use_ekf else None,
+            "v_est" :   v_rel_g.copy() if settings.use_ekf else None,
+            "range_est" : Range_g if settings.use_ekf else None,
+            "nees" : nees,
         }
         if save_history:
             history.append(step)
+
+        #GIMBAL LIVE MOVEMENT
+        if servo is not None and step_index % gimbal_send_interval == 0:
+            az_deg = math.degrees(math.atan2(r_rel[1], r_rel[0]))
+            el_deg = math.degrees(math.asin(float(np.clip(r_rel[2] / Range, -1.0, 1.0))))
+            try:
+                servo.set_servo_angle(az_deg, el_deg)
+            except Exception as e:
+                print("Gimbal write failed: {e}. Disabling gimbal for the rest of this run")
+                servo = None
+
+            if servo is not None:
+                target_wall = sim_start_wall + t
+                now = time.time()
+                if target_wall > now:
+                    time.sleep(target_wall - now)
+        step_index += 1
+
 
         #INTERCEPTOR DYNAMICS
         interceptor.step_rk4(dt, a_actual)
@@ -150,6 +244,14 @@ def run_simulator(settings, ic_override = None, save_history = True, N = None, N
 
         #TIME STEP
         t += dt
+    
+    #CLEAN UP HARDWARE CONNECTIONS
+    if sensor is not None:
+        sensor.close()
+    if servo is not None:
+        servo.close()
+    if shared_ser is not None and shared_ser.is_open:
+        shared_ser.close()
 
     #FINAL MISS DISTANCE
     miss_distance = Range  
@@ -166,6 +268,9 @@ def run_simulator(settings, ic_override = None, save_history = True, N = None, N
     #SATURATION FRACTION
     saturation_fraction = saturated_steps / total_steps if total_steps else 0.0                  
 
+    #NEES SUMMARY
+    mean_nees = (nees_sum/nees_count) if nees_count > 0 else None
+    final_nees = last_nees
     #TERMINATION REASONING
     if hit:
         termination_reason = "hit"
@@ -188,5 +293,7 @@ def run_simulator(settings, ic_override = None, save_history = True, N = None, N
         "termination_reason" : termination_reason,
         "N"     :   N,
         "N_zem" :   N_zem,
+        "mean_nees" : mean_nees,
+        "final_nees" : final_nees,
         "history" : history,
     }

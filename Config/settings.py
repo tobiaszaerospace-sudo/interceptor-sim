@@ -8,10 +8,19 @@ class Settings:
         self.camera_index = 0
         self.fps = 30
         #HARDWARE SETTINGS
-        self.servo_port = "COM4"
+        self.servo_port = "COM3"
         self.servo_baud = 115200
-        self.serial_port = "COM4"
+        self.serial_port = "COM3"
         self.baudrate = 115200
+        #EKF AND SENSOR SETTINGS
+        self.use_ekf = False
+        self.use_imu = False
+        self.sensor_az_sigma = .5
+        self.sensor_el_sigma = .5
+        self.sensor_az_bias = 0.0
+        self.sensor_el_bias = 0.0
+        self.imu_port = "COM3"
+        self.imu_buad = 115200
         #MODEL SETTINGS
         self.yolo_model_path = "yolov8n.pt"
         #SIMULATION SETTINGS

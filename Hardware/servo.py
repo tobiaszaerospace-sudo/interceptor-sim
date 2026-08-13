@@ -6,9 +6,14 @@ import serial
 import time
 class ServoController:
     #INITIALIZE AND GET COMMUNICATION READY
-    def __init__(self, port="COM4", baud=115200):
-        self.ser = serial.Serial(port, baud, timeout=1)
-        time.sleep(2)  # Wait for the serial connection to initialize
+    def __init__(self, port="COM4", baud=115200, ser = None):
+        if ser is not None:
+            self.ser = ser
+            self._owns_connection = False
+        else:
+            self.ser = serial.Serial(port, baud, timeout=1)
+            time.sleep(2)  # Wait for the serial connection to initialize
+            self._owns_connection = True
     #SET THE SERVO ANGLE BASED ON INPUTS
     def set_servo_angle(self, az_deg, el_deg):
         az_deg = max(-90.0, min(90.0, az_deg))  # Clamp azimuth to [-90, 90]
@@ -19,5 +24,6 @@ class ServoController:
         self.ser.write(msg.encode("utf-8"))
     #CLOSE THE SERIAL CONNECTION
     def close(self):
-        self.ser.close()
+        if self._owns_connection:
+            self.ser.close()
 
