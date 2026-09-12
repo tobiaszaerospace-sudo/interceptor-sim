@@ -22,7 +22,7 @@ class Prediction:
     #BASED ON DIFFERENCE IN POSITION DATA, FIND VELOCITY AND ACCELERATION IN X AND Y DIRECTION RESPECTIVELY
     def compute_velocity_acceleration(self, positions):
         #IF ANY POSITION IS NONE, RETURN ZERO VELOCITY AND ACCELERATION
-        if None in positions:
+        if any(p is None for p in positions):
             return np.array([0.0, 0.0]), np.array([0.0, 0.0])
         
         #COMPUTE VELOCITY AS DIFFERENCE IN POSITION OVER TIME STEP FOR X AND Y DIRECTION

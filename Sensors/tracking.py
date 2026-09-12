@@ -15,7 +15,7 @@ class Tracker:
     def __init__(self):
         #SET AS PROPERTY
         #  OF CAMERA SO IT CAN BE REFERENCED EASIER
-        self.camera = Camera()
+        self.camera = Camera(device_index = 1)
         self.yolo = YOLO("yolov8n.pt") #LOAD YOLO MODEL (CHANGE TO CUSTOM MODEL AFTER TRAINED)
         self.apriltag = Detector(families="tag36h11", nthreads=4,quad_decimate=1.0,quad_sigma=0.0, refine_edges=True,)
 
@@ -43,17 +43,18 @@ class Tracker:
         
         #USE HIGHEST CONFIDENCE DETECTION
         best_box = results[0].boxes[0]
+        conf = best_box.conf[0]
         #GRAB THE OUTPUT TENSOR FROM YOLO
-        output_tensor = best_box.xywhc[0] #GET (x_center, y_center, width, height, confidence)
+        output_tensor = best_box.xywh[0] #GET (x_center, y_center, width, height, confidence)
         #CONVERT THE OUTPUT TENSOR TO MY VARIABLES IN A LIBRARY
         yolo_output_vals = {
             "cx": float(output_tensor[0]), #X CENTER
             "cy": float(output_tensor[1]), #Y CENTER
             "w": float(output_tensor[2]),  #WIDTH
             "h": float(output_tensor[3]),  #HEIGHT
-            "confidence": float(output_tensor[4]), #CONFIDENCE
+            "confidence": float(conf), #CONFIDENCE
             "valid": True, #VALID DETECTION
-            "raw": output_tensor #STORE RAW OUTPUT FOR DEBUGGING
+            "raw": best_box #STORE RAW OUTPUT FOR DEBUGGING
         }
         return yolo_output_vals 
     

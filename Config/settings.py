@@ -20,7 +20,7 @@ class Settings:
         self.sensor_az_bias = 0.0
         self.sensor_el_bias = 0.0
         self.imu_port = "COM3"
-        self.imu_buad = 115200
+        self.imu_baud = 115200
         #MODEL SETTINGS
         self.yolo_model_path = "yolov8n.pt"
         #SIMULATION SETTINGS

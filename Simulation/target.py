@@ -60,6 +60,14 @@ class Target:
         
         #UPDATE VELOCITY AND POSITION
         self.step_rk4(dt)
+
+    #RECORDED CAMERA TRACKING MOTION
+    def recorded(self, dt):
+        #GRAB DATA
+        trajectory = self.params['trajectory']
+        self.r = trajectory.position(self.time)
+        self.v = trajectory.velocity(self.time)
+        self.a = trajectory.acceleration(self.time)
     
     #UPDATE FUNCTION 
     def update(self, dt):
@@ -69,6 +77,8 @@ class Target:
             self.constant_acceleration(dt)
         elif self.motion_type == "weaving":
             self.weaving(dt)
+        elif self.motion_type == 'recorded':
+            self.recorded(dt)
         
         self.time += dt
         

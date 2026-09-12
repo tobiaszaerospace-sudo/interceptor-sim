@@ -32,7 +32,7 @@ def plot_guidance_analysis(history, title_suffix = ""):
 
     #PLOT 1 - LOS ANGLE V TIME
     ax1 = fig.add_subplot(gs[0,0])
-    ax1.plot(t, los_ang, color = 'steelblue', lw=1.5)
+    ax1.plot(t, np.degrees(los_ang), color = 'steelblue', lw=1.5)
     ax1.set_xlabel("Time (s)")
     ax1.set_ylabel("LOS Angle (deg)")
     ax1.set_title(f"LOS Angle vs Time{suf}")

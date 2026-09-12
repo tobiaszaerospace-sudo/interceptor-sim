@@ -12,10 +12,15 @@ class ServoController:
             self._owns_connection = False
         else:
             self.ser = serial.Serial(port, baud, timeout=1)
+            self.ser.setDTR(False) #Stop board from resetting
             time.sleep(2)  # Wait for the serial connection to initialize
             self._owns_connection = True
     #SET THE SERVO ANGLE BASED ON INPUTS
     def set_servo_angle(self, az_deg, el_deg):
+        if az_deg < -90.0 or az_deg > 90.0:
+            print(f"Azimuth {az_deg:.1f} deg is past the gimbal limit")
+        if el_deg < -90.0 or el_deg > 90.0:
+            print(f"Elevation {el_deg:.1f} deg is past the gimbal limit")
         az_deg = max(-90.0, min(90.0, az_deg))  # Clamp azimuth to [-90, 90]
         el_deg = max(-90.0, min(90.0, el_deg))  # Clamp elevation to [-90, 90]
         az_deg += 90.0  # Convert from -90 to 90 range to 0 to 180 range

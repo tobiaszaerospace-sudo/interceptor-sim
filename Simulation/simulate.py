@@ -113,7 +113,8 @@ def run_simulator(settings, ic_override = None, save_history = True, N = None, N
     step_index = 0
 
     #FIXED WALL-CLOCK REFERENCE FOR REAL TIME PACING
-    sim_start_wall = time.time() if servo is not None else None
+    gimbal_requested = servo is not None
+    sim_start_wall = time.time() if gimbal_requested else None
 
     #START LOOP
     while t < t_max:
@@ -165,11 +166,11 @@ def run_simulator(settings, ic_override = None, save_history = True, N = None, N
             
         #LOGGING STATE AND RUNNING CALCULATION
         if mode == "PN":
-            a_command = guidance.pn(r_hat, Vc, los_rate)
+            a_command = guidance.pn(r_hat_g, Vc_g, los_rate_g)
         elif mode == "APN":
-            a_command = guidance.apn(r_hat, Vc, los_rate, target.a)
+            a_command = guidance.apn(r_hat_g, Vc_g, los_rate_g, target.a)
         elif mode == "ZEM":
-            a_command = guidance.zem_guidance(r_rel, v_rel, target.a, Vc, Range)
+            a_command = guidance.zem_guidance(r_rel_g, v_rel_g, target.a, Vc_g, Range_g)
         
         #AUTOPILOT CORRECTION
         a_actual = autopilot.update(a_command, dt)
@@ -219,20 +220,22 @@ def run_simulator(settings, ic_override = None, save_history = True, N = None, N
             history.append(step)
 
         #GIMBAL LIVE MOVEMENT
-        if servo is not None and step_index % gimbal_send_interval == 0:
-            az_deg = math.degrees(math.atan2(r_rel[1], r_rel[0]))
-            el_deg = math.degrees(math.asin(float(np.clip(r_rel[2] / Range, -1.0, 1.0))))
-            try:
-                servo.set_servo_angle(az_deg, el_deg)
-            except Exception as e:
-                print("Gimbal write failed: {e}. Disabling gimbal for the rest of this run")
-                servo = None
-
+        if gimbal_requested and step_index % gimbal_send_interval == 0:
             if servo is not None:
+                v = interceptor.v
+                speed = np.linalg.norm(v)
+                az_deg = math.degrees(math.atan2(v[1], v[0]))
+                el_deg = math.degrees(math.asin(float(np.clip(v[2]/speed, -1.0, 1.0)))) if speed > 0 else 0.0
+                try:
+                    servo.set_servo_angle(az_deg, el_deg)
+                except Exception as e:
+                    print(f"Gimbal write failed: {e}. Disabling gimbal hardware for the rest of this run")
+                    servo = None
                 target_wall = sim_start_wall + t
                 now = time.time()
                 if target_wall > now:
-                    time.sleep(target_wall - now)
+                    time.sleep(target_wall-now)   
+
         step_index += 1
 
 

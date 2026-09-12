@@ -15,7 +15,11 @@ def run_gimbal_tracking():
     print("Starting Gimbal Tracking...")
     #INITIALIZE CLASSES
     tracker = Tracker()
-    servo = ServoController(port = settings.servo_port, baud = settings.servo_baud)
+    try:
+        servo = ServoController(port = settings.servo_port, baud = settings.servo_baud)
+    except Exception as e:
+        print(f"Gimbal connection failed: {e}. Continuing without camera")
+        servo = None
     los = LOSComputer(camera_fov_degrees=settings.camera_fov_x, image_width=settings.image_width, image_height=settings.image_height)
     #SHOW USER MENU FOR TRACKING METHOD
     print("\nSelect Prediction Method:")
@@ -36,6 +40,7 @@ def run_gimbal_tracking():
     #TIME STEP
     time_step = 1/settings.fps
     future_time = .1 #100 MS AHEAD
+    current_az, current_el = 0.0, 0.0
     try:
         while True:
             data = tracker.process_frame()
@@ -57,7 +62,7 @@ def run_gimbal_tracking():
                 error_y = cy - tag_cy
                 print(f"YOLO vs AprilTag Error: X={error_x:.2f}, Y={error_y:.2f}")
             #ADD TO ROLLING BUFFER
-            frame_history.append({"cx": cx, "cy": cy, "timestamp": time.time()})
+            frame_history.append({"cx": cx, "cy": cy, "timestamp": time.time(), "valid" : True})
             #IF WE DON'T HAVE ENOUGH FRAMES FOR PREDICTION, FALLBACK TO ZEROETH-ORDER
             if len(frame_history) < 3:
                 pred_cx, pred_cy = cx, cy
@@ -81,11 +86,11 @@ def run_gimbal_tracking():
                 pred_cx, pred_cy = pred["future_cx"], pred["future_cy"]
             #COMPUTE LOS ANGLES FROM PREDICTED POSITION TO OUTPUT TO USER AND SERVOS
             los_angles = los.compute_los_angles(pred_cx, pred_cy)
-            az, el = los_angles["angle_x"], los_angles["angle_y"]
-            #TELL USER
-            print(f"[YOLO] AZ: {az:.2f}°, EL: {el:.2f}°")
-            #COMMAND SERVOS
-            servo.set_servo_angle(az, el)
+            print(f"[YOLO] raw offset - AZ: {los_angles['angle_x']:.2f} deg, EL: {los_angles['angle_y']:.2f} deg")
+            current_az += los_angles["angle_x"]
+            current_el += los_angles["angle_y"]
+            if servo is not None:
+                servo.set_servo_angle(current_az, current_el)
             #DRAW PREDICTED POINT ON FRAME FOR USER
             cv2.circle(frame, (int(pred_cx), int(pred_cy)), 6, (0, 0, 255), -1)
             cv2.imshow("Tracking", frame)
@@ -98,6 +103,7 @@ def run_gimbal_tracking():
     finally:
         #DESTROY ALL WINDOWS
         tracker.release()
-        servo.close()
+        if servo is not None:
+            servo.close()
         cv2.destroyAllWindows()
         print("Gimball Tracking Stopped.")

@@ -3,6 +3,7 @@ import math
 import time
 from Config.settings import settings
 import numpy as np
+from Simulation.recorded_motion import RecordedTrajectory
 #BLOCK AGAINST IMPORT ISSUES CRASHING
 try:
     import serial
@@ -33,6 +34,7 @@ class InitialConditions:
         try:
             #OPEN SERIAL PORT AND READ DATA
             ser = serial.Serial(self.port, self.baudrate, timeout=1)
+            ser.setDTR(False) #Stop board from resetting
             time.sleep(2)  # WAIT FOR SERIAL CONNECTION TO ESTABLISH
             ser.write(b"GET\n")#REQUEST ANGLES
             #DECODE ANGLES FROM SERIAL INPUT
@@ -45,6 +47,11 @@ class InitialConditions:
             yaw_deg = get_float("Enter interceptor yaw angle (degrees): ")
             pitch_deg = get_float("Enter interceptor pitch angle (degrees): ")
             return math.radians(yaw_deg), math.radians(pitch_deg)
+        finally:
+            try:
+                ser.close()
+            except Exception:
+                pass
     
     #INTERCEPTOR IC's
     def build_interceptor(self):
@@ -72,6 +79,7 @@ class InitialConditions:
         print("1. Constant Velocity")
         print("2. Constant Acceleration")
         print("3. Weaving")
+        print("4. Recorded (from camera tracking log)")
 
         #PICK MOTION CHOICE
         motion_type = input("Enter choice (1-3): ").strip()
@@ -81,9 +89,25 @@ class InitialConditions:
             target_motion = "constant_acceleration"
         elif motion_type == '3':
             target_motion = 'weaving'
+        elif motion_type == '4':
+            target_motion = "recorded"
         else:
             print("Invalid choice, defaulting to constant velocity")
             target_motion = "constant_velocity"
+
+        #IF RECORDED GET DATA FROM LOG
+        if target_motion == 'recorded':
+            csv_path = input("Enter path to recorded tracking CSV: ").strip()
+            range_m = get_float("Enter simulated range at t=0 (m): ")
+            time_scale = get_float("Enter time-scale factor (1.0 = as-recorded): ")
+            trajectory = RecordedTrajectory(csv_path, range_m = range_m, time_scale = time_scale)
+            settings.target_motion = target_motion
+            return {
+                "initial_position" : trajectory.position(0.0).tolist(),
+                "initial_velocity" : trajectory.velocity(0.0).tolist(),
+                "motion_model" : target_motion,
+                "params" : {"trajectory" : trajectory}
+            }
 
         #DIRECTION AND SPEED INPUTS
         Vt = get_float("Enter a target speed (m/s): ")
