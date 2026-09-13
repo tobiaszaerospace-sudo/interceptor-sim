@@ -4,6 +4,7 @@ import time
 from Config.settings import settings
 import numpy as np
 from Simulation.recorded_motion import RecordedTrajectory
+from Sensors.motion_recorder import record_target_motion
 #BLOCK AGAINST IMPORT ISSUES CRASHING
 try:
     import serial
@@ -17,6 +18,16 @@ def get_float(prompt):
             return float(input(prompt))
         except ValueError:
             print("Invalid input. Enter a numeric value.")
+
+#GET LOS DIRECTION VECTOR
+def _unit_vector(self, az, el):
+    return np.array([
+        np.cos(el) * np.cos(az),
+        np.cos(el) * np.sin(az),
+        np.sin(el)
+    ])
+
+
 #INITIAL CONDITIONS CLASS FOR SIMULATION
 class InitialConditions:
     def __init__(self, port = "COM4", baudrate = 115200):
@@ -82,7 +93,7 @@ class InitialConditions:
         print("4. Recorded (from camera tracking log)")
 
         #PICK MOTION CHOICE
-        motion_type = input("Enter choice (1-3): ").strip()
+        motion_type = input("Enter choice (1-4): ").strip()
         if motion_type == "1":
             target_motion = "constant_velocity"
         elif motion_type == '2':
@@ -97,10 +108,39 @@ class InitialConditions:
 
         #IF RECORDED GET DATA FROM LOG
         if target_motion == 'recorded':
-            csv_path = input("Enter path to recorded tracking CSV: ").strip()
-            range_m = get_float("Enter simulated range at t=0 (m): ")
+            #GET DATA
+            records = record_target_motion()
+
+            #EXTRACT DATA INTO LISTS
+            timestamps = [r['timestamp'] for r in records]
+            az_list = [r['angle_x'] for r in records]
+            el_list = [r['angle_y'] for r in records]
+            range_list = [r['range_m'] for r in records]
+
+            #STOP THE HUGE JUMPS BY TAKING THE MEDIAN
+            def _median_filter(values, window=5):
+                #GRAB VALUES AND RETURN MEDIANS
+                values = np.array(values, dtype=float)
+                n = len(values)
+                half = window//2
+                return[float(np.median(values[max(0, i-half):min(n, i+half+1)])) for i in range(n)]
+
+            range_list = _median_filter(range_list, window=5)
+
+            #GET FRAME GAPS
+            frame_gaps = np.diff(timestamps)
+            real_frame_interval = float(np.median(frame_gaps))
+            
+            #USE DATA AND GET RANGES/TIMES
+            initial_range_m = get_float("Enter simulated starting engagement range (m), real range curve will be scaled to start here: ")
             time_scale = get_float("Enter time-scale factor (1.0 = as-recorded): ")
-            trajectory = RecordedTrajectory(csv_path, range_m = range_m, time_scale = time_scale)
+
+            #STORE TIME STRETCH
+            settings.recorded_lookahead = real_frame_interval*time_scale
+
+            trajectory = RecordedTrajectory(timestamps, az_list, el_list, range_list, initial_range_m = initial_range_m, time_scale = time_scale)
+
+            #STORE AND RETURN DATA
             settings.target_motion = target_motion
             return {
                 "initial_position" : trajectory.position(0.0).tolist(),

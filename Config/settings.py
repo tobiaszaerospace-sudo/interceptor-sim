@@ -3,6 +3,7 @@ class Settings:
     def __init__(self):
         #CAMERA SETTINGS
         self.camera_fov_x = 70.0
+        self.stereo_baseline = .06
         self.image_width = 640
         self.image_height = 480
         self.camera_index = 0

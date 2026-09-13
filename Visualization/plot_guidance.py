@@ -97,7 +97,7 @@ def plot_ekf_analysis(history, title_suffix = ""):
     #CHECK VALIDITY
     valid = [s for s in history if s.get("r_est") is not None and s.get("nees") is not None]
     if not valid:
-        print("No EKF data in this history (use_ekf was off for this run) - skipping EKF plot {f'   ({title_suffix})' if title_suffix else ''}.")
+        print(f"No EKF data in this history (use_ekf was off for this run) - skipping EKF plot {f'   ({title_suffix})' if title_suffix else ''}.")
         return None
     
     #GRAB ARRAYS FOR PLOTTING

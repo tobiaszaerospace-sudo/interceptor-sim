@@ -202,6 +202,7 @@ def run_simulator(settings, ic_override = None, save_history = True, N = None, N
             "interceptor_vel" : interceptor.v.copy(),
             "target_pos" : target.r.copy(),
             "target_vel" : target.v.copy(),
+            "target_accel" : target.a.copy(),
             "r_rel" : r_rel.copy(),
             "v_rel" : v_rel.copy(),
             "range" : Range,

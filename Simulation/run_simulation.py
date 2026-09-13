@@ -5,6 +5,7 @@ from Simulation.simulate import run_simulator
 from Visualization.plot_trajectory import plot_3d_trajectory
 kill_radius = settings.kill_radius
 from Visualization.plot_guidance import plot_guidance_analysis, plot_ekf_analysis
+from Visualization.plot_prediction import plot_prediction_analysis
 
 #NO NEED FOR CLASS, CAN JUST USE FUNCTION
 def run_simulation():
@@ -14,12 +15,11 @@ def run_simulation():
     print("1. Proportional Navigation (PN)")
     print("2. Augmented Proportional Navigation (APN)")
     print("3. Zero Effort Miss (ZEM)")
-    print("4. Real Life Tracking Simulation")
 
     #GET USER INPUT AND VALIDATE
-    choice = input("Enter choice (1-4): ").strip()
-    while choice not in ["1", "2", "3", "4"]:
-        choice = input("Invalid choice. Enter choice (1-4): ").strip()
+    choice = input("Enter choice (1-3): ").strip()
+    while choice not in ["1", "2", "3"]:
+        choice = input("Invalid choice. Enter choice (1-3): ").strip()
     
     #SELECT GUIDANCE MODE
     if choice == '1':
@@ -28,8 +28,6 @@ def run_simulation():
         guidance_mode = "APN"
     elif choice == '3':
         guidance_mode = "ZEM"
-    elif choice == '4':
-        guidance_mode = "REAL"
     else:
         print("Invalid choice. Defaulting to PN.")
         guidance_mode = "PN"
@@ -68,5 +66,9 @@ def run_simulation():
     plot_guidance_analysis(result['history'], title_suffix = result['model'])
     #PLOT EKF TRUE VS ESTIMATE AND NEES
     plot_ekf_analysis(result['history'], title_suffix = result['model'])
+
+    #RECORDED OPTION
+    if settings.target_motion == 'recorded':
+        plot_prediction_analysis(result['history'], lookahead = settings.recorded_lookahead, title_suffix = result['model'])
 
     return result
