@@ -19,3 +19,16 @@
 #LINK               - https://secwww.jhuapl.edu/techdigest/Content/techdigest/pdf/V29-N01/29-01-Palumbo_Homing.pdf
 #SOURCE DESCRIPTION - Paper on practically all of strategic missile guidance
 #LINK - https://ia601404.us.archive.org/13/items/TacticalAndStrategicMissileGuidance2012/Tactical%20and%20Strategic%20Missile%20Guidance%20%282012%29.pdf
+#SOURCE DESCRIPTIOIN - Paper on EKF 
+#LINK - https://secwww.jhuapl.edu/techdigest/content/techdigest/pdf/V29-N01/29-01-Palumbo_Guidance.pdf
+#SOURCE DESCRIPTION - Original Kalman Filter paper (LOTS OF MAGIC EQUATIONS)
+#LINK - https://hans.fugal.net/comps/papers/kalman_1960.pdf
+#SOURCE DESCRIPTION - Wilson Score Confidence Interval findings
+#LINK - https://statisticsfundamentals.com/confidence-intervals/wilson-score-interval/
+#SOURCE DESCRIPTION - NEES(Normalized Error Estimation Squared) Basics and reasonings
+#LINK - https://www.jhuapl.edu/sites/default/files/2024-09/35-02-Hays.pdf
+#SOURCE DESCRIPTION - Optimization of wrong signal(Why sometimes PN will be better than APN or ZEM for real guidance modes)
+#LINK - https://arxiv.org/pdf/2605.03167
+#SOURCE DESCRIPTION - Others using Monte-Carlo and showing literature gap with real worlds data vs parametric targets
+#LINK - https://arxiv.org/pdf/2504.01851
+

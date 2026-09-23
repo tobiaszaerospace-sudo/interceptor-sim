@@ -82,6 +82,7 @@ def run_monte_carlo(n_trials = 500, modes = None, master_seed = 0, convergence_c
                     "trial"         :   i,
                     "mode"          :   mode,
                     "motion_type"   :   ic["target_data"]["motion_model"],
+                    "clip_index"    :   ic["target_data"].get("clip_index"),
                     "hit"           :   out["hit"],
                     "miss_distance" :   out['miss_distance'],
                     "peak_accel"    :   out["peak_accel"],
@@ -102,6 +103,7 @@ def run_monte_carlo(n_trials = 500, modes = None, master_seed = 0, convergence_c
                     "trial"         :   i,
                     "mode"          :   mode,
                     "motion_type"   :   ic["target_data"]["motion_model"],
+                    "clip_index"    :   ic['target_data'].get("clip_index"),
                     "hit"           :   False,
                     "miss_distance" :   np.nan,
                     "peak_accel"    :   0.0,
@@ -225,6 +227,22 @@ def summarize_monte_carlo(mc_output):
                 motion_breakdown[mt] = {'n': len(mt_trials),
                                         'hit_rate': mt_hit_rate}
 
+        #IF AGAINST RECORDED MOTION, CHANGE BREAKDOWN
+        is_recorded = any(t['motion_type'] == 'recorded' for t in trials)
+        clip_breakdown = {}
+        if is_recorded:
+            clip_indices = sorted(set(t.get('clip_index') for t in trials if t.get('clip_index') is not None))
+            for ci in clip_indices:
+                ci_trials = [t for t in trials if t.get('clip_index') == ci]
+                ci_hit_rate = sum(t['hit'] for t in ci_trials) / len(ci_trials)*100
+                ci_misses = [t['miss_distance'] for t in ci_trials if not t['hit'] and not np.isnan(t['miss_distance'])]
+                ci_med_miss = np.median(ci_misses) if ci_misses else np.nan
+                clip_breakdown[ci] = {
+                    'n' :   len(ci_trials),
+                    'hit_rate'  :   ci_hit_rate,
+                    'median_miss'   :   ci_med_miss}
+                                  
+
         summary[mode] = {
             "n"             : n,
             "hit_rate"      : hit_rate,
@@ -246,6 +264,8 @@ def summarize_monte_carlo(mc_output):
             "nees_std"          : nees_std,
             "termination_counts": term_counts,
             "motion_breakdown"  : motion_breakdown,
+            "is_recorded"       : is_recorded,
+            'clip_breakdown'    : clip_breakdown,
             "convergence"       : convergence[mode]
         }
 
@@ -284,33 +304,51 @@ def summarize_monte_carlo(mc_output):
         print(f"  Termination Reasons:")
         for reason, count in s["termination_counts"].items():
             print(f"      {reason:<18}: {count}  ({count/s['n']*100:.1f}%)")
-        print(f"  Hit Rate by Motion Model:")
-        for mt, label in [("constant_velocity", "CV"),
-                          ("constant_acceleration", "CA"),
-                          ("weaving", "WE")]:
-            if mt in s["motion_breakdown"]:
-                bd = s["motion_breakdown"][mt]
-                print(f"      {label}: {bd['hit_rate']:.1f}%  (n={bd['n']})")
-            else:
-                print(f"      {label}: N/A (n=0)")
+        if s['is_recorded']:
+            print(f" Hit Rate by Recorded Clip: ")
+            for ci, bd in sorted(s['clip_breakdown'].items()):
+                print(f"    Clip {ci} : {bd['hit_rate']:.1f}%  (n={bd['n']}, median miss = {bd['median_miss']:.2f}m)")
+        else:
+            print(f"  Hit Rate by Motion Model:")
+            for mt, label in [("constant_velocity", "CV"),
+                              ("constant_acceleration", "CA"),
+                              ("weaving", "WE")]:
+                if mt in s["motion_breakdown"]:
+                    bd = s["motion_breakdown"][mt]
+                    print(f"      {label}: {bd['hit_rate']:.1f}%  (n={bd['n']})")
+                else:
+                    print(f"      {label}: N/A (n=0)")
         print(f"  Convergence (running hit rate by trial count):")
         for c in s["convergence"]:
             print(f"      n={c['n']:>4}: {c['hit_rate']:.1f}%")
     
     #CROSS MODE COMPARISON FOR HIT RATE BY GUIDANCE LAW PER MOTION MODEL
     print("\n" + "-"*60)
-    print("Hit Rate by Guidance Law per Motion Model: ")
-    for mt, label in [("constant_velocity", "CV"), 
-                      ("constant_acceleration", "CA"),
-                      ("weaving", "Weave")]:
-        parts = []
-        for mode in modes:
-            bd = summary[mode]['motion_breakdown'].get(mt)
-            if bd is None:
-                parts.append(f"{mode}: N/A (n=0)")
-            else:
-                parts.append(f"{mode}: {bd['hit_rate']:.1f}%")
-        print(f"    {label}: " + "  |   ".join(parts))
+    if summary[modes[0]]['is_recorded']:
+        print("Hit Rate by Guidance Law per Recorded Clips: ")
+        all_clips = sorted(set(ci for mode in modes for ci in summary[mode]['clip_breakdown'].keys()))
+        for ci in all_clips:
+            parts = []
+            for mode in modes:
+                bd = summary[mode]['clip_breakdown'].get(ci)
+                if bd is None:
+                    parts.append(f"{mode} : N/A (n=0)")
+                else:
+                    parts.append(f"{mode}: {bd['hit_rate']:.1f}%")
+            print(f"    Clip {ci} : " + " |  ".join(parts))
+    else:
+        print("Hit Rate by Guidance Law per Motion Model: ")
+        for mt, label in [("constant_velocity", "CV"), 
+                              ("constant_acceleration", "CA"),
+                              ("weaving", "Weave")]:
+                parts = []
+                for mode in modes:
+                    bd = summary[mode]['motion_breakdown'].get(mt)
+                    if bd is None:
+                        parts.append(f"{mode}: N/A (n=0)")
+                    else:
+                        parts.append(f"{mode}: {bd['hit_rate']:.1f}%")
+                print(f"    {label}: " + "  |   ".join(parts))
     print("-"*60 + "\n")
-
+        
     return summary

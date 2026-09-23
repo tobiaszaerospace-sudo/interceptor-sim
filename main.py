@@ -15,6 +15,8 @@ from Visualization.plot_trajectory import plot_3d_trajectory
 from Visualization.plot_validation import plot_validation
 from Visualization.plot_guidance import plot_guidance_analysis
 from csv_export import export_monte_carlo_csv
+from Sensors.motion_recorder import record_batch, load_recording_pool
+from Sensors.motion_recorder import record_batch, load_recording_pool, manage_recordings
 
 #OPTION 5: EXIT
 def exit_program():
@@ -34,11 +36,14 @@ def main():
         print("6. Monte-Carlo across one variable(Sweep)")
         print("7. Validation logic graph")
         print("8. Settings")
-        print("9. Exit")
-        choice = input("Enter your choice (1-9): ").strip()
-        while choice not in ["1", "2", "3", "4", "5", "6", "7", "8", "9"]:
-            print("Invalid input. Please enter a number between 1 and 9.")
-            choice = input("Enter your choice (1-9): ").strip()
+        print("9. Record Target Motion Library")
+        print("10. Manage/Delete Recorded Clips")
+        print("11. Monte-Carlo on Recorded Motion")
+        print("12. Exit")
+        choice = input("Enter your choice (1-12): ").strip()
+        while choice not in ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"]:
+            print("Invalid input. Please enter a number between 1 and 12.")
+            choice = input("Enter your choice (1-12): ").strip()
         if choice == "1":
             run_gimbal_tracking()
         elif choice == "2":
@@ -116,6 +121,97 @@ def main():
             plot_validation(results, ic)
         elif choice == "8":
             run_settings_menu()
+        elif choice == "9":
+            record_batch()
+        elif choice == "10":
+            manage_recordings()
+        elif choice == "11":
+            #LOAD POOL
+            pool = load_recording_pool()
+            #IF NO POOL THEN TELL USER TO BEGIN POOL
+            if not pool:
+                print("No recorded clips found. Use option 9 to record a library first")
+            else:
+                print(f"Loaded {len(pool)} recorded clip(s).")
+                #DETERMINE TRIALS(OR LACK OF INPUT) AND RESET TO START
+                settings.guidance_mode = "PN"
+                n_trials = input("Enter number of trials per guidance mode (default 500): ").strip()
+                if n_trials == "":
+                    n_trials = 500
+                else:
+                    #GET TRIAL NUMBER
+                    try:
+                        n_trials = int(n_trials)
+                        if n_trials <= 0:
+                            print("Must be positive. Using default 500")
+                            n_trials = 500
+                    except ValueError:
+                        print("Invalid input. Using default 500.")
+                        n_trials = 500
+                #GET SEED FOR RUN FOR REPEATIBILITY
+                seed_input = input("Enter random seed (default 0): ").strip()
+                if seed_input == "":
+                    seed = 0
+                else:
+                    try:
+                        seed = int(seed_input)
+                    except ValueError:
+                        print("Invalid input. Using default seed 0")
+                        seed = 0
+
+                #GET RUN DETAILS
+                initial_range_m = float(input("Enter starting engagement range (m), real range curves get scaled to start here: ").strip() or 1000.0)
+                time_scale = float(input("Enter time-scale factor (1.0 = as-recorded): ").strip() or 1.0)
+                if time_scale == "":
+                    time_scale = 1.0
+                    break
+                elif time_scale < 0:
+                    print("Time scale must be positive. Try again")
+                    time_scale = input("Enter time-scale factor")
+                    
+                ekf_choice = input("Enable EKF state estimation with sensor noise? (y/n): ").strip().lower()
+                settings.use_ekf = (ekf_choice == 'y')
+                if settings.use_ekf:
+                    imu_choice = input("Use real IMU hardware instead of synthetic noise? (y/n): ").strip().lower()
+                    settings.use_imu = (imu_choice == 'y')
+                else:
+                    settings.use_imu = False
+
+                ic_overrides = {
+                    "recordings_pool": pool,
+                    "initial_range_m": initial_range_m,
+                    "time_scale": time_scale,
+                }
+                mc_output = run_monte_carlo(n_trials = n_trials, master_seed = seed, ic_overrides = ic_overrides)
+                summary = summarize_monte_carlo(mc_output)
+                plot_monte_carlo(mc_output, summary)
+                settings.guidance_mode = "PN"
+                #AFTER PLOTTING ASK IF THEY WANT TO SEE A SINGLE TRIAL
+                view = input("View a sample trajectory? (y/n): ").strip().lower()
+                if view == 'y':
+                    print("Select mode:  1) PN   2) APN   3) ZEM")
+                    mode_choice = input(" Choice: ").strip()
+                    mode_dict = {
+                        "1": "PN",
+                        "2": "APN",
+                        "3": "ZEM"
+                    }
+                    mode = mode_dict.get(mode_choice)
+                    available = list(mc_output['sample_trajectories'][mode].keys())
+                    print(f"Available trial indeces: {available}")
+                    trial_input = input("Select trial index: ").strip()
+                    try:
+                        trial_idx = int(trial_input)
+                    except ValueError:
+                        trial_idx = available[0]
+
+                    history = mc_output['sample_trajectories'][mode][trial_idx]
+                    plot_3d_trajectory(history)
+                    plot_guidance_analysis(history, title_suffix = f" {mode} Trial {trial_idx}")
+                    print("Do you want a csv export?(y/n):")
+                    export = input("").strip().lower()
+                    if export == 'y':
+                        export_monte_carlo_csv(mc_output, summary)
         else:
             exit_program()
 

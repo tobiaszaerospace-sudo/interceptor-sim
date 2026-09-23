@@ -2,6 +2,8 @@
 #IMPORT STUFF
 import time
 import cv2
+import os
+import json
 from Sensors.tracking import Tracker
 from Sensors.stereo_depth import split_frame, focal_length_px, estimate_depth
 from Detection_Data_Processing.los_computation import LOSComputer
@@ -82,3 +84,87 @@ def record_target_motion():
 
     #RETURN DATA
     return records
+
+#SAVE A RECORDING TO DISK SO IT CAN BE REUSED FOR MONTE CARLO
+def save_recording(records, folder = "Recordings"):
+    os.makedirs(folder, exist_ok=True)
+    path = os.path.join(folder, f"clip_{int(time.time()*1000)}.json")
+    with open(path, "w") as f:
+        json.dump(records, f)
+    return path
+
+#LOAD EVERY SAVED CLIP IN FOLDER INTO LIST OF RECORD LISTS (MONTE CARLO POOL)
+def load_recording_pool(folder="Recordings"):
+    if not os.path.isdir(folder):
+        return []
+    pool = []
+    for fname in sorted(os.listdir(folder)):
+        if fname.endswith(".json"):
+            with open(os.path.join(folder, fname)) as f:
+                pool.append(json.load(f))
+        return pool
+
+#RECORD SEVERAL CLIPS IN A ROW AND SAVE UNTIL STOPPED
+def record_batch():
+    print("Recording a library of target motion clips for Monte Carlo")
+    print("You'll record one clip at a time) Press ESC during each to stop")
+    count = 0
+    while True:
+        records = record_target_motion()
+        path = save_recording(records)
+        count += 1
+        print(f"Saved clip #{count} to {path}")
+        again = input("Record another clip? (y/n): ").strip().lower()
+        if again != 'y':
+            break
+    print(f"Done. {count} clip(s) saved to the Recordings folder.")
+
+#LIST ALL SAVED CLIP FILENAMES
+def list_recordings(folder="Recordings"):
+    if not os.path.isdir(folder):
+        return []
+    return sorted(f for f in os.listdir(folder) if f.endswith(".json"))
+
+#DELETE A SAVED CLIP BY FILENAME
+def delete_recording(filename, folder="Recordings"):
+    path = os.path.join(folder, filename)
+    if os.path.exists(path):
+        os.remove(path)
+        return True
+    return False
+
+#MAKE MENU FOR REVIEWING AND DELETING SAVED CLIPS
+def manage_recordings(folder = "Recordings"):
+    while True:
+        #GET LIST OF FILES
+        files = list_recordings(folder)
+        #CHECK FOR NO FILES
+        if not files:
+            print("No recorded clips found")
+            return
+
+        #IF THERE ARE FILES
+        print("\nRecorded clips:")
+        for i, f in enumerate(files):
+            print(f"    {i} : {f}")
+            choice = input("Enter a number to delete, 'all' to delete all, or pess enter to go back: ").strip().lower()
+            if choice == "":
+                return
+            if choice == "all":
+                confirm = input(f"Delete all clips? (y/n): ").strip().lower()
+                if confirm == 'y':
+                    for f in files:
+                        delete_recording(f, folder)
+                    print("All clips deleted")
+                continue
+            try:
+                idx = int(choice)
+                if 0 <= idx < len(files):
+                    deleted_name = files[idx]
+                    delete_recording(deleted_name, folder)
+                    print(f"Deleted {deleted_name}")
+                else:
+                    print("Invalid index.")
+            except ValueError:
+                print("Invalid input.")
+        

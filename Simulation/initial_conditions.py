@@ -210,6 +210,62 @@ class InitialConditions:
         #NORMALIZE TO EMPTY DICT SO DON'T NEED AS MANY NONE CHECKS
         if overrides is None:
             overrides = {}
+
+        #CHECK FOR RECORDED MOTION
+        recordings_pool = overrides.get("recordings_pool")
+        if recordings_pool:
+
+            #IF THEY'RE THERE, EXTRACT DATA
+            clip_index = int(rng.integers(0, len(recordings_pool)))
+            records = recordings_pool[clip_index]
+            timestamps = [r['timestamp'] for r in records]
+            az_list = [r['angle_x'] for r in records]
+            el_list = [r['angle_y'] for r in records]
+            range_list = [r['range_m'] for r in records]
+
+            #FILTER FOR HUGE JUMPS
+            def _median_filter(values, window=5):
+                values = np.array(values, dtype=float)
+                n = len(values)
+                half = window//2
+                return [float(np.median(values[max(0, i-half):min(n, i+half+1)])) for i in range(n)]
+
+            range_list = _median_filter(range_list, window=5)
+
+            #GET LARGET INFORMATION VALUES AND SAVE AS VARIABLES
+            initial_range_m = overrides.get("initial_range_m", 1000.0)
+            time_scale = overrides.get("time_scale", 1.0)
+            trajectory = RecordedTrajectory(timestamps, az_list, el_list, range_list, initial_range_m = initial_range_m, time_scale = time_scale)
+
+            #GET INTERCEPTOR IN RIGHT DIRECTION
+            rt0 = trajectory.position(0.0)
+            Vi = overrides.get("Vi", rng.uniform(150.0, 400.0))
+            pointing_error_rad = np.radians(overrides.get("pointing_error_deg", 20.0))
+            los_yaw = np.arctan2(rt0[1], rt0[0])
+            los_pitch = np.arctan2(rt0[2], np.sqrt(rt0[0]**2 + rt0[1]**2))
+            yaw_i = los_yaw + rng.uniform(-pointing_error_rad, pointing_error_rad)
+            pitch_i = los_pitch + rng.uniform(-pointing_error_rad, pointing_error_rad)
+            ri0 = [0, 0, 0]
+            vi0 = [
+                Vi * np.cos(pitch_i) * np.cos(yaw_i),
+                Vi * np.cos(pitch_i) * np.sin(yaw_i),
+                Vi * np.sin(pitch_i)
+            ]
+
+            #RETURN DATA
+            return {
+                "ri0" : ri0,
+                "vi0" : vi0,
+                "target_data" : {
+                    "initial_position" : rt0.tolist(),
+                    "initial_velocity" : trajectory.velocity(0.0).tolist(),
+                    "motion_model" : "recorded",
+                    "clip_index" : clip_index,
+                    "params" : {
+                        "trajectory" : trajectory
+                    }
+                }
+            }
         
         #TARGET WITH RANDOM RANGE, POSITION, AND HEADING
         if "R_target" in overrides:

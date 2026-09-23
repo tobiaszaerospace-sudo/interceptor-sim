@@ -113,6 +113,30 @@ def _plot_miss_cdf(ax, results, modes):
 
 #PLOT 3 HIT RATE BY TARGET MOTION MODEL
 def _plot_motion_breakdown(ax, summary, modes):
+    #CHECK FOR RECORDING
+    if summary[modes[0]].get('is_recorded'):
+        clip_ids = sorted(set(ci for mode in modes for ci in summary[mode]['clip_breakdown'].keys()))
+        x = np.arange(len(clip_ids))
+        width = .25
+
+        for i, mode in enumerate(modes):
+            rates = [summary[mode]['clip_breakdown'].get(ci, {"hit_rate" : 0.0})['hit_rate'] for ci in clip_ids]
+            ax.bar(x+i*width, rates, width,
+                    label = mode, color = mode_colors[mode],
+                    alpha = .85, edgecolor = "black", linewidth = .5)
+
+        ax.set_xticks(x+width)
+        ax.set_xticklabels([f"Clip {ci}" for ci in clip_ids])
+        ax.set_ylabel("Hit Rate (%)")
+        ax.set_ylim(0,115)
+        ax.set_title("Hit Rate by Recorded Clip")
+        ax.text(.98,.05,"Shows which law handles each recorded motion clip best.",
+                transform = ax.transAxes, fontsize = 7, ha = "left", va = "top", bbox = dict(boxstyle="round,pad=.3", facecolor="lightyellow", alpha=.8))
+        ax.legend(fontsize = 9)
+        ax.grid(True, alpha = .3, axis = "y")
+        return
+
+    #SYNTHETIC MOTION MODELS
     motion_types = ["constant_velocity", "constant_acceleration", "weaving"]
 
     #X POSITION AND WIDTH OF GROUPS
