@@ -8,6 +8,14 @@ class Settings:
         self.image_height = 480
         self.camera_index = 0
         self.fps = 30
+        #STEREO VIDEO ANALYSIS SETTINGS - PLANE
+        self.stereo_video_1_path = r"C:\Users\tobia\OneDrive\Personal Projects\Missile_Interception_Simulation_Artifacts\camera8_20260301_152157.mkv"
+        self.stereo_video_2_path = r"C:\Users\tobia\OneDrive\Personal Projects\Missile_Interception_Simulation_Artifacts\camera2_20260301_152157.mkv"
+        self.stereo_video_1_fps = None
+        self.stereo_video_2_fps = None
+        self.stereo_detection_confidence = .05
+        self.stereo_sync_tolerance_frames = 1.0
+        self.stereo_show_detections = False
         #HARDWARE SETTINGS
         self.servo_port = "COM3"
         self.servo_baud = 115200

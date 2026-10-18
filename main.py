@@ -1,13 +1,18 @@
 #IMPORT LIBRARIES
 import time
+import numpy as np
 #IMPORT CLASSES
 from Config.settings import settings
 from Hardware.gimbal_tracking import run_gimbal_tracking
 from Hardware.gimbal_calibration import run_gimbal_calibration
 from Config.settings_menu import run_settings_menu
+from Simulation import initial_conditions
+from Simulation.initial_conditions import InitialConditions
+from Simulation.recorded_motion import RecordedTrajectory
 from Simulation.run_simulation import run_simulation
 from Simulation.model_comparison import run_comparison
 from Simulation.monte_carlo import run_monte_carlo, summarize_monte_carlo
+from Simulation.simulate import run_simulator
 from Visualization.plot_monte_carlo import plot_monte_carlo
 from Simulation.menu_sweep import menu_sweep
 from Simulation.validate_pn import run_validation
@@ -17,6 +22,10 @@ from Visualization.plot_guidance import plot_guidance_analysis
 from csv_export import export_monte_carlo_csv
 from Sensors.motion_recorder import record_batch, load_recording_pool
 from Sensors.motion_recorder import record_batch, load_recording_pool, manage_recordings
+from Simulation.validate_apn import run_validation as run_apn_validation
+from Detection_Data_Processing.stereo_plane_analysis import vid_analysis
+from Simulation.xyz_to_angles import xyz_to_angles
+
 
 #OPTION 5: EXIT
 def exit_program():
@@ -34,16 +43,18 @@ def main():
         print("4. Model Comparison")
         print("5. Monte-Carlo Simulation")
         print("6. Monte-Carlo across one variable(Sweep)")
-        print("7. Validation logic graph")
-        print("8. Settings")
-        print("9. Record Target Motion Library")
-        print("10. Manage/Delete Recorded Clips")
-        print("11. Monte-Carlo on Recorded Motion")
-        print("12. Exit")
-        choice = input("Enter your choice (1-12): ").strip()
-        while choice not in ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"]:
-            print("Invalid input. Please enter a number between 1 and 12.")
-            choice = input("Enter your choice (1-12): ").strip()
+        print("7. PN Validation logic graph")
+        print("8. APN Validation logic graph")
+        print("9. Settings")
+        print("10. Stereo Plane Analysis (single video)")
+        print("11. Monte Carlo with recorded plane motion model")
+        print("12. Record Target Motion Library(non-plane)")
+        print("13. Manage/Delete Recorded Clips")
+        print("14. Monte-Carlo on Recorded Motion")
+        print("15. Exit")
+        choice = input("Enter your choice (1-15): ").strip()
+        while choice not in ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12","13","14","15"]: 
+            print("Invalid input. Please enter a number between 1 and 15")
         if choice == "1":
             run_gimbal_tracking()
         elif choice == "2":
@@ -120,12 +131,90 @@ def main():
             results, ic = run_validation()
             plot_validation(results, ic)
         elif choice == "8":
-            run_settings_menu()
+            results, ic = run_apn_validation()
+            plot_validation(results, ic)
         elif choice == "9":
-            record_batch()
+            run_settings_menu()
         elif choice == "10":
-            manage_recordings()
+            video_results = vid_analysis(settings)
+
+            if video_results is None:
+                print("Stereo analysis returned no data. Check video paths")
+                continue
+
+            valid_results = [r for r in video_results if all(np.isfinite(r[key]) for key in ("timestamp_s", "x", "y", "z"))]
+            if not valid_results:
+                print("No finite 3D positions were produced, cannot run the interception")
+                continue
+
+            print(f"Using {len(valid_results)} valid recorded positions")
+            parsed_data = xyz_to_angles(valid_results)
+            timestamps = [r["timestamp"] for r in parsed_data]
+            azimuths = [r["angle_x"] for r in parsed_data]
+            elevations = [r["angle_y"] for r in parsed_data]
+            ranges = [r["range_m"] for r in parsed_data]
+
+            trajectory = RecordedTrajectory(
+                timestamps,
+                azimuths,
+                elevations,
+                ranges,
+                initial_range_m=ranges[0],
+                time_scale=1.0,
+            )
+
+            recorded_target_data = {
+                "initial_position": trajectory.position(0.0).tolist(),
+                "initial_velocity": trajectory.velocity(0.0).tolist(),
+                "motion_model": "recorded",
+                "params": {"trajectory": trajectory},
+            }
+
+            initial_conditions = InitialConditions()
+            ri0, vi0 = initial_conditions.build_interceptor()
+
+            ic_override = {
+                "ri0" : ri0,
+                "vi0" : vi0,
+                "target_data" : recorded_target_data,
+            }
+            settings.target_motion = "recorded"
+            settings.recorded_lookahead = float(np.median(np.diff(timestamps)))
+
+            results = run_simulator(settings, ic_override = ic_override)
+            print("\n=== Single Recorded-Path Intercept ===")
+            print(f"Guidance Mode: {results['model']}")
+            print(f"Hit: {results['hit']}")
+            print(f"Miss Distance: {results['miss_distance']:.3f} m")
+            print(f"Final Time: {results['t_final']:.3f} s")
+            print(f"Termination: {results['termination_reason']}")
+
+            plot_3d_trajectory(results["history"])
+            plot_guidance_analysis(
+                results["history"],
+                title_suffix=f" {results['model']} recorded-path run",
+            )
+
         elif choice == "11":
+            ekf_choice = input("Enable EKF state estimation with sensor noise (y/n): ").strip().lower()
+            settings.use_ekf = ekf_choice == 'y'
+            results = vid_analysis(settings)
+            if results is None:
+                print("Stereo analysis did not return data. Check video paths in Settings")
+                continue
+            valid_results = [r for r in results if all(np.isfinite(r[key]) for key in ("timestamp_s", "x", "y", "z"))]
+            print(f"Skipping {len(results) - len(valid_results)} rows without finite XYZ")
+            parsed_data = xyz_to_angles(valid_results)
+            n_trials = int(input("Number of Monte Carlo trials: "))
+            seed = int(input("Random seed: ").strip())
+            monte_carlo_results = run_monte_carlo(n_trials = n_trials, master_seed = seed, ic_overrides = {"recordings_pool" : [parsed_data]})
+            summary = summarize_monte_carlo(monte_carlo_results)
+            plot_monte_carlo(monte_carlo_results, summary)
+        elif choice == "12":
+            record_batch()
+        elif choice == "13":
+            manage_recordings()
+        elif choice == "14":
             #LOAD POOL
             pool = load_recording_pool()
             #IF NO POOL THEN TELL USER TO BEGIN POOL

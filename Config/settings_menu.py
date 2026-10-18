@@ -24,14 +24,21 @@ def run_settings_menu():
         print(f"18. Sensor El Bias (deg): {settings.sensor_el_bias}")
         print(f"19. IMU Port: {settings.imu_port}")
         print(f"20. IMU Baud: {settings.imu_baud}")
-        print("21. Return to Main Menu")
+        print(f"21. Stereo video 1 path: {settings.stereo_video_1_path}")
+        print(f"22. Stereo video 2 path: {settings.stereo_video_2_path}")
+        print(f"23. Stereo video 1 FPS: {settings.stereo_video_1_fps}")
+        print(f"24. Stereo video 2 FPS: {settings.stereo_video_2_fps}")
+        print(f"25. Stereo detection confidence: {settings.stereo_detection_confidence}")
+        print(f"26. Stereo sync tolerance (frames): {settings.stereo_sync_tolerance_frames}")
+        print(f"27. Show stereo detections: {settings.stereo_show_detections}")
+        print("28. Return to Main Menu")
 
-        choice = input("Enter setting number (1-21): ").strip()
-        while choice not in [str(i) for i in range(1, 22)]:
+        choice = input("Enter setting number (1-28): ").strip()
+        while choice not in [str(i) for i in range(1, 28)]:
             print("Invalid input.")
-            choice = input("Enter setting number (1-21): ").strip()
+            choice = input("Enter setting number (1-28): ").strip()
 
-        if choice == "21":
+        if choice == "28":
             print("Returning to Main Menu...")
             break
 
@@ -189,3 +196,42 @@ def run_settings_menu():
                 print(f"IMU baud updated to {settings.imu_baud}")
             except ValueError:
                 print("Invalid input.")
+
+        #CAM 1 VIDEO PATH
+        elif choice == "21":
+            settings.stereo_video_1_path = input("Camera 1 video path: ").strip()
+
+        #CAM 2 VIDEO PATH
+        elif choice == "22":
+            settings.stereo_video_2_path = input("Camera 2 video path: ").strip()
+
+        #CAM 1 FPS
+        elif choice == "23":
+            value = input("Camera 1 FPS(Blank for video metadata): ").strip()
+            settings.stereo_video_1_fps = float(value) if value else None
+
+        #CAM 2 FPS
+        elif choice == "24":
+            value = input("Camera 2 FPS(Blank for video metadata): ").strip()
+            settings.stereo_video_2_fps = float(value) if value else None
+
+        #DETECTION CONFIDENCE
+        elif choice == "25":
+            value = float(input("Detection confidence (0 to 1): ").strip())
+            if 0.0 <= value <= 1.0:
+                settings.stereo_detection_confidence = value
+            else:
+                print("Confidence must be between 0 and 1.")
+
+        #FRRAME DIFFERENCE
+        elif choice == "26":
+            value = float(input("Max frame-pair difference in frames: ").strip())
+            if value >= 0.0:
+                settings.stereo_sync_tolerance_frames = value
+            else:
+                print("Tolerance must be non-negative")
+
+        #DETECTIONS WHILE PROCESSING
+        elif choice == "27":
+            value = input("Show detections while processing? (y/n): ").strip().lower()
+            settings.stereo_show_detections = (value == 'y')
